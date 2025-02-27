@@ -1,0 +1,15 @@
+services:
+
+  mongodb: 
+    ports:
+      - "27017:27017"
+    image: mongo 
+    networks:
+      - server-jaol
+    container_name: basedatos_jaol
+    volumes:
+      - /data/db
+networks:
+  server-jaol:
+    driver: bridge
+    

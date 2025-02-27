@@ -1,0 +1,32 @@
+import mongoose, { Schema, model } from "mongoose";
+
+type FechaTipo = `${string}-${string}-${string}`;
+
+// Interfaz del producto en factura
+interface IProductoEnFactura {
+  productoId: mongoose.Schema.Types.ObjectId;
+  cantidad: number;
+  precioCosto: number;
+  precioVenta: number;
+  descuento: number;
+  facturacontenedora: mongoose.Schema.Types.ObjectId;
+}
+// Schema del producto en factura
+const SchemaProductoEnFactura = new Schema<IProductoEnFactura>({
+  productoId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Product",
+  },
+  cantidad: { type: Number, required: true },
+  precioCosto: { type: Number, required: true },
+  precioVenta: { type: Number, required: true },
+  descuento: { type: Number, required: true },
+  facturacontenedora: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Invoice",
+  }
+});
+
+export default model("ProductInvoice", SchemaProductoEnFactura);
