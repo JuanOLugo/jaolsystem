@@ -4,7 +4,7 @@
   "description": "backend for jaol system",
   "main": "index.ts",
   "scripts": {
-    "test": "nodemon ./src/index.ts"
+    "dev": "nodemon ./src/index.ts"
   },
   "repository": {
     "type": "git",

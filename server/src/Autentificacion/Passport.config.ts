@@ -13,6 +13,7 @@ passport.use(
   new Strategy(NuevaEstrategia, async (payload, done) => {
     try {
       const { _id } = payload;
+      
       const BuscarUsuario = await UsuarioModel.findOne({ _id });
       if (BuscarUsuario) return done(null, BuscarUsuario);
       return done(null, false);

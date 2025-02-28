@@ -1,13 +1,19 @@
-"use client";
-
 import type React from "react";
 import { useState } from "react";
 import { Eye, EyeOff, User, Mail, Lock, UserCircle } from "lucide-react";
+import {
+  IUserRegisterControl,
+  LoginUser,
+  RegisterUser
+} from "../../Controllers/User.controllers";
+import ErrorToast from "../toast/ErrorToast";
+import cookie from "js-cookie"
+import { Errorhandle } from "../toast/ToastFunctions/ErrorHandle";
 
 type FormType = "login" | "register";
 type UserRole = "admin" | "empleado";
 
-interface IUserLogin {
+export interface IUserLogin {
   email: string;
   password: string;
 }
@@ -23,7 +29,7 @@ interface IUserRegister {
 const AuthForms: React.FC = () => {
   const [formType, setFormType] = useState<FormType>("login");
   const [showPassword, setShowPassword] = useState(false);
-
+  const [Error, setError] = useState<string>("");
   const [UserLogin, setUserLogin] = useState<IUserLogin>({
     email: "",
     password: "",
@@ -36,22 +42,62 @@ const AuthForms: React.FC = () => {
     role: "admin",
   });
 
+  const date = new Date().toLocaleDateString("es-co");
+
   const toggleForm = () => {
     setFormType(formType === "login" ? "register" : "login");
   };
 
+
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formType === "login") {
-      console.log(UserLogin);
+      if (UserLogin.email.length > 1 && UserLogin.password.length > 1) {
+        LoginUser(UserLogin)
+          .then((data) => console.log(data))
+          .catch((err) => Errorhandle(err.response.data.msg, setError));
+        return;
+      } else {
+        Errorhandle("Error rellene credenciales", setError);
+        return;
+      }
     }
 
     if (formType === "register") {
-      if(UserRegister.password !== UserRegister.confirmPassword) {
-        alert("Las contraseñas no coinciden");
-        return;
-      }
-      console.log(UserRegister);
+      const { username, confirmPassword, email, password, role } = UserRegister;
+
+      if (
+        username.length > 1 &&
+        confirmPassword.length > 1 &&
+        email.length > 1 &&
+        password.length > 1 &&
+        role.length > 1
+      ) {
+        if (password !== confirmPassword) {
+          Errorhandle("La contraseña no coincide", setError);
+          return;
+        }
+
+        const data: IUserRegisterControl = {
+          email,
+          password,
+          role,
+          username,
+          createdIn: date,
+        };
+
+        RegisterUser(data).then(data => {
+          console.log(data)
+          const tokencookie = cookie.get("token")
+          if(tokencookie) {
+            localStorage.setItem("user", tokencookie)
+            window.location.reload()
+          }
+          else Errorhandle("Error to set user, try again", setError)
+
+        }).catch(err => Errorhandle(err.response.data.msg, setError));
+      } else Errorhandle("Rellene las credenciales", setError);
     }
   };
 
@@ -80,6 +126,7 @@ const AuthForms: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <ErrorToast error={Error} />
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -104,7 +151,7 @@ const AuthForms: React.FC = () => {
                     value={UserRegister.username}
                     onChange={handleChange}
                     required
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                    className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-400 focus:border-blue-500 focus:z-10 sm:text-sm"
                     placeholder="Nombre de usuario"
                   />
                 </div>
@@ -124,7 +171,7 @@ const AuthForms: React.FC = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-400 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Correo electrónico"
                   value={
                     formType === "login" ? UserLogin.email : UserRegister.email
@@ -147,7 +194,7 @@ const AuthForms: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-400 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Contraseña"
                   value={
                     formType === "login"
@@ -186,7 +233,7 @@ const AuthForms: React.FC = () => {
                       name="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       required
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-400 focus:border-blue-500 focus:z-10 sm:text-sm"
                       placeholder="Confirmar contraseña"
                       value={UserRegister.confirmPassword}
                       onChange={handleChange}
@@ -205,7 +252,7 @@ const AuthForms: React.FC = () => {
                       id="role"
                       name="role"
                       required
-                      className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                      className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-400 focus:border-blue-500 focus:z-10 sm:text-sm"
                       value={UserRegister.role}
                       onChange={handleChange}
                     >
@@ -222,7 +269,7 @@ const AuthForms: React.FC = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
             >
               {formType === "login" ? "Iniciar sesión" : "Registrarse"}
             </button>
@@ -231,7 +278,7 @@ const AuthForms: React.FC = () => {
         <div className="text-center">
           <button
             onClick={toggleForm}
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-blue-400 hover:text-blue-600"
           >
             {formType === "login"
               ? "¿No tienes una cuenta? Regístrate"
