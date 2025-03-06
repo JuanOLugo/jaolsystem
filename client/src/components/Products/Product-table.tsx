@@ -9,7 +9,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { GetMyProducts } from "../../Controllers/Product.controllers";
+import { DeleteProduct, GetMyProducts } from "../../Controllers/Product.controllers";
 import ErrorToast from "../toast/ErrorToast";
 import { Errorhandle } from "../toast/ToastFunctions/ErrorHandle";
 
@@ -36,16 +36,12 @@ const ProductTable: React.FC = () => {
   const [Error, setError] = useState("");
   const [ProductQuantity, setProductQuantity] = useState(0);
   const [Calls, setCalls] = useState(0);
-  // Obtener productos
 
   // Función para manejar la búsqueda
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
+    setCalls(0);
   };
-
-  useEffect(() => {
-    console.log(ProductQuantity);
-  }, [ProductQuantity]);
 
   // Función para manejar el ordenamiento
   const handleSort = (column: keyof Product) => {
@@ -57,31 +53,19 @@ const ProductTable: React.FC = () => {
     }
   };
 
-  // Filtrar y ordenar productos
-  const filteredAndSortedProducts = products
-    .filter(
-      (product) =>
-        product.codigoBarra.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (!sortColumn) return 0;
-      if (a[sortColumn] < b[sortColumn])
-        return sortDirection === "asc" ? -1 : 1;
-      if (a[sortColumn] > b[sortColumn])
-        return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
 
+
+  // Obtener productos
   useEffect(() => {
-    GetMyProducts({ cantidad: 50, skip: Calls })
+    GetMyProducts({ cantidad: 50, skip: Calls, filterProduct: searchTerm })
       .then((response) => {
         setProducts(response.data.data);
         setProductQuantity(response.data.length);
-        console.log(response);
+        console.log("1")
       })
-      .catch((error) => Errorhandle("Algo fallo en el servidor", setError));
-  }, [Calls]);
+      .catch(() => Errorhandle("Algo fallo en el servidor", setError));
+      
+  }, [Calls, searchTerm]);
 
   return (
     <div className="min-h-screen h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
@@ -142,7 +126,7 @@ const ProductTable: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredAndSortedProducts.map((product) => (
+              {products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.codigoBarra}
@@ -170,7 +154,14 @@ const ProductTable: React.FC = () => {
                       <Edit size={18} />
                     </button>
                     <button className="text-red-600 hover:text-red-900">
-                      <Trash2 size={18} />
+                      <Trash2 size={18} onClick={async () => {
+                        // Eliminar producto
+                       await DeleteProduct({ ProductId: product._id }).then(()=> {
+                        const NewProductsSet = products.filter(p => p._id!== product._id);
+                        setProducts(NewProductsSet);
+                        setProductQuantity(ProductQuantity - 1)
+                       }).catch(() => Errorhandle("Algo fallo en el servidor", setError));
+                      }}/>
                     </button>
                   </td>
                 </tr>

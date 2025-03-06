@@ -8,14 +8,8 @@ export const CreateProduct = async (
   res: Response
 ): Promise<any> => {
   const { _id } = req.user as { _id: "" };
-  const {
-    codigo,
-    nombre,
-    precioCosto,
-    precioVenta,
-    proveedor,
-    date,
-  } = req.body;
+  const { codigo, nombre, precioCosto, precioVenta, proveedor, date } =
+    req.body;
 
   try {
     const newProduct = new ProductoModel({
@@ -27,7 +21,7 @@ export const CreateProduct = async (
       proveedorNombre: proveedor,
       creadoEn: date,
       actualizadoEn: date,
-      usuariocontenedor: _id
+      usuariocontenedor: _id,
     });
 
     await newProduct.save();
@@ -36,7 +30,6 @@ export const CreateProduct = async (
     res.status(500).send({ error: "Error al crear el producto" });
     console.log(error);
   }
-
 };
 
 export const CreateCode = async (req: Request, res: Response): Promise<any> => {
@@ -60,19 +53,61 @@ export const CreateCode = async (req: Request, res: Response): Promise<any> => {
   res.status(200).send({ codigo: numeroCompleto });
 };
 
-
-export const GetMyProducts = async (req: Request, res: Response): Promise<any> => {
+export const GetMyProducts = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
   const { _id } = req.user as { _id: "" };
-  const {cantidad, skip} = req.body;
-  if(_id === "") return res.status(400).send({msg: "No auth"})
+  const { skip, filterProduct } = req.body;
+  if (_id === "") return res.status(400).send({ msg: "No auth" });
 
   try {
     const misProductos = await ProductoModel.find({
       usuariocontenedor: _id,
     });
-    res.status(200).send({data: misProductos.slice(skip, skip + 50), length: misProductos.length});
+
+    if (filterProduct.length > 0) {
+      const FiltradoAEnviar = misProductos.filter(
+        (product) =>
+          product.codigoBarra
+            .toLowerCase()
+            .includes(filterProduct.toLowerCase()) ||
+          product.nombre.toLowerCase().includes(filterProduct.toLowerCase())
+      );
+
+      res.status(200).send({
+        data: FiltradoAEnviar.slice(skip, skip + 50),
+        length: FiltradoAEnviar.length,
+      });
+    } else {
+      res.status(200).send({
+        data: misProductos.slice(skip, skip + 50),
+        length: misProductos.length,
+      });
+    }
   } catch (error) {
     res.status(500).send({ error: "Error al obtener mis productos" });
+    console.log(error);
+  }
+};
+
+export const DeleteProduct = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { _id } = req.user as { _id: "" };
+  const { ProductId } = req.body;
+  if (_id === "") return res.status(400).send({ msg: "No auth" });
+
+  try {
+    const misProductos = await ProductoModel.findOneAndDelete({
+      usuariocontenedor: _id,
+      _id: ProductId,
+    });
+
+    res.status(200).send({ msg: "Producto eliminado" });
+  } catch (error) {
+    res.status(500).send({ error: "_id i" });
     console.log(error);
   }
 };
