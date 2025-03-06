@@ -1,93 +1,94 @@
-import type React from "react"
-import { useState } from "react"
-import { Search, Edit, Trash2, ChevronDown, ChevronUp } from "lucide-react"
+import type React from "react";
+import { useEffect, useState } from "react";
+import {
+  Search,
+  Edit,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
+import { GetMyProducts } from "../../Controllers/Product.controllers";
+import ErrorToast from "../toast/ErrorToast";
+import { Errorhandle } from "../toast/ToastFunctions/ErrorHandle";
 
 // Tipo para un producto
 type Product = {
-  id: number
-  code: string
-  name: string
-  salePrice: number
-  costPrice: number
-  provider: string
-  stock: number
-  lastUpdated: string
-}
+  _id: string;
+  nombre: String;
+  precioDeCosto: Number;
+  precioDeVenta: Number;
+  stock: Number;
+  codigoBarra: String;
+  proveedorNombre: String;
+  creadoEn: string;
+  actualizadoEn: String;
+};
 
 // Datos de ejemplo
-const initialProducts: Product[] = [
-  {
-    id: 1,
-    code: "P001",
-    name: "Producto 1",
-    salePrice: 100,
-    costPrice: 80,
-    provider: "Proveedor A",
-    stock: 50,
-    lastUpdated: "2023-05-15",
-  },
-  {
-    id: 2,
-    code: "P002",
-    name: "Producto 2",
-    salePrice: 150,
-    costPrice: 120,
-    provider: "Proveedor B",
-    stock: 30,
-    lastUpdated: "2023-05-14",
-  },
-  {
-    id: 3,
-    code: "P003",
-    name: "Producto 3",
-    salePrice: 200,
-    costPrice: 160,
-    provider: "Proveedor C",
-    stock: 20,
-    lastUpdated: "2023-05-13",
-  },
-  // Añade más productos aquí...
-]
 
 const ProductTable: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(initialProducts)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortColumn, setSortColumn] = useState<keyof Product | "">("")
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortColumn, setSortColumn] = useState<keyof Product | "">("");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [Error, setError] = useState("");
+  const [ProductQuantity, setProductQuantity] = useState(0);
+  const [Calls, setCalls] = useState(0);
+  // Obtener productos
 
   // Función para manejar la búsqueda
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value)
-  }
+    setSearchTerm(event.target.value);
+  };
+
+  useEffect(() => {
+    console.log(ProductQuantity);
+  }, [ProductQuantity]);
 
   // Función para manejar el ordenamiento
   const handleSort = (column: keyof Product) => {
     if (column === sortColumn) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
-      setSortColumn(column)
-      setSortDirection("asc")
+      setSortColumn(column);
+      setSortDirection("asc");
     }
-  }
+  };
 
   // Filtrar y ordenar productos
   const filteredAndSortedProducts = products
     .filter(
       (product) =>
-        product.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()),
+        product.codigoBarra.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.nombre.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
-      if (!sortColumn) return 0
-      if (a[sortColumn] < b[sortColumn]) return sortDirection === "asc" ? -1 : 1
-      if (a[sortColumn] > b[sortColumn]) return sortDirection === "asc" ? 1 : -1
-      return 0
-    })
+      if (!sortColumn) return 0;
+      if (a[sortColumn] < b[sortColumn])
+        return sortDirection === "asc" ? -1 : 1;
+      if (a[sortColumn] > b[sortColumn])
+        return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+
+  useEffect(() => {
+    GetMyProducts({ cantidad: 50, skip: Calls })
+      .then((response) => {
+        setProducts(response.data.data);
+        setProductQuantity(response.data.length);
+        console.log(response);
+      })
+      .catch((error) => Errorhandle("Algo fallo en el servidor", setError));
+  }, [Calls]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6">Tabla de Productos</h1>
+    <div className="min-h-screen h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
+      <div className="max-w-7xl mx-auto   h-[90%] ">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-6">
+          Tabla de Productos
+        </h1>
 
         {/* Buscador */}
         <div className="mb-4 relative">
@@ -102,8 +103,9 @@ const ProductTable: React.FC = () => {
         </div>
 
         {/* Tabla */}
-        <div className="overflow-x-auto bg-white rounded-xl shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="overflow-x-auto h-[80%]  rounded-xl shadow-sm  overflow-y-scroll">
+          <ErrorToast error={Error} />
+          <table className="min-w-full divide-y  divide-gray-200  ">
             <thead className="bg-gray-50">
               <tr>
                 {[
@@ -120,12 +122,20 @@ const ProductTable: React.FC = () => {
                     key={index}
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort(header.toLowerCase().replace(" ", "") as keyof Product)}
+                    onClick={() =>
+                      handleSort(
+                        header.toLowerCase().replace(" ", "") as keyof Product
+                      )
+                    }
                   >
                     <div className="flex items-center">
                       {header}
                       {sortColumn === header.toLowerCase().replace(" ", "") &&
-                        (sortDirection === "asc" ? <ChevronUp size={16} /> : <ChevronDown size={16} />)}
+                        (sortDirection === "asc" ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        ))}
                     </div>
                   </th>
                 ))}
@@ -133,14 +143,28 @@ const ProductTable: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredAndSortedProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.code}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.salePrice.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${product.costPrice.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.provider}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.lastUpdated}</td>
+                <tr key={product._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.codigoBarra}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.nombre}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${product.precioDeVenta.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    ${product.precioDeCosto.toFixed(2)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.proveedorNombre}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.stock.toString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {product.actualizadoEn}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button className="text-blue-600 hover:text-blue-900 mr-3">
                       <Edit size={18} />
@@ -154,10 +178,61 @@ const ProductTable: React.FC = () => {
             </tbody>
           </table>
         </div>
+        <div className="flex flex-col sm:flex-row items-center justify-between bg-white px-4 py-3 rounded-lg shadow-sm">
+          <div className="flex-1 text-sm text-gray-700 mb-2 sm:mb-0">
+            <span className="font-medium text-blue-600">{Calls + 1}</span>
+            {" - "}
+            <span className="font-medium text-blue-600">
+              {Calls + 50 > ProductQuantity ? ProductQuantity : Calls + 50}
+            </span>
+            {" de "}
+            <span className="font-medium text-blue-600">{ProductQuantity}</span>
+            {" productos"}
+          </div>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => {
+                if (Calls === 0) return;
+                setCalls(Calls - 50);
+              }}
+              disabled={Calls === 0}
+              className={`
+            flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
+            ${
+              Calls === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-blue-100 text-blue-600 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            }
+          `}
+              aria-label="Página anterior"
+            >
+              <ChevronLeft size={20} />
+            </button>
+
+            <button
+              onClick={() => {
+                if (Calls + 50 >= ProductQuantity) return;
+                setCalls(Calls + 50);
+              }}
+              disabled={Calls + 50 >= ProductQuantity}
+              className={`
+            flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200
+            ${
+              Calls + 50 >= ProductQuantity
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-blue-100 text-blue-600 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+            }
+          `}
+              aria-label="Página siguiente"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ProductTable
-
+export default ProductTable;

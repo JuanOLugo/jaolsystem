@@ -19,4 +19,8 @@ export const CreateProduct = async (data: ProductSend): Promise<any> => {
   return response;
 };
 
+export const GetMyProducts = async (data: object): Promise<any> => {
+  const response = await axios.post(proxyUrl + "/product/get", data, {headers: axiosConfigHeader});
+  return response;
+};
 

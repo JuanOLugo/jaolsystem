@@ -14,11 +14,28 @@ export const CreateProduct = async (
     precioCosto,
     precioVenta,
     proveedor,
-    antiguedad,
     date,
   } = req.body;
 
-   
+  try {
+    const newProduct = new ProductoModel({
+      nombre,
+      precioDeCosto: precioCosto,
+      precioDeVenta: precioVenta,
+      stock: 0,
+      codigoBarra: codigo,
+      proveedorNombre: proveedor,
+      creadoEn: date,
+      actualizadoEn: date,
+      usuariocontenedor: _id
+    });
+
+    await newProduct.save();
+    res.status(201).send({ message: "Producto creado" });
+  } catch (error) {
+    res.status(500).send({ error: "Error al crear el producto" });
+    console.log(error);
+  }
 
 };
 
@@ -41,4 +58,21 @@ export const CreateCode = async (req: Request, res: Response): Promise<any> => {
   });
 
   res.status(200).send({ codigo: numeroCompleto });
+};
+
+
+export const GetMyProducts = async (req: Request, res: Response): Promise<any> => {
+  const { _id } = req.user as { _id: "" };
+  const {cantidad, skip} = req.body;
+  if(_id === "") return res.status(400).send({msg: "No auth"})
+
+  try {
+    const misProductos = await ProductoModel.find({
+      usuariocontenedor: _id,
+    });
+    res.status(200).send({data: misProductos.slice(skip, skip + 50), length: misProductos.length});
+  } catch (error) {
+    res.status(500).send({ error: "Error al obtener mis productos" });
+    console.log(error);
+  }
 };

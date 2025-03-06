@@ -14,7 +14,6 @@ interface IFormData {
   precioCosto: number | "";
   precioVenta: number | "";
   proveedor: string;
-  antiguedad: string;
 }
 
 export interface ProductSend extends IFormData {
@@ -28,7 +27,6 @@ export default function Createproducts() {
     precioCosto: "",
     precioVenta: "",
     proveedor: "",
-    antiguedad: "",
   };
   const [Error, setError] = useState("");
   const [Success, setSuccess] = useState("");
@@ -59,14 +57,13 @@ export default function Createproducts() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    let { codigo, nombre, precioCosto, precioVenta, antiguedad } = formData;
+    let { codigo, nombre, precioCosto, precioVenta } = formData;
 
     if (
       codigo.length > 4 ||
       nombre.length < 1 ||
       precioCosto.toString().length < 1 ||
-      precioVenta.toString().length < 1 ||
-      antiguedad.length < 1
+      precioVenta.toString().length < 1 
     )
       return Errorhandle("Rellene todo los campos", setError);
 
@@ -88,11 +85,12 @@ export default function Createproducts() {
       precioCosto: Number(precioCosto),
       precioVenta: Number(precioVenta),
       date: new Date().toLocaleDateString("es-co"),
+      proveedor: "LOCAL"
     };
-    console.log(dataToSend);
+
     // Crear el producto en la base de datos
     CreateProduct(dataToSend)
-      .catch((data) => {
+      .then((data) => {
         console.log(data);
         Succeshandle("Producto creado", setSuccess);
       })
@@ -229,32 +227,6 @@ export default function Createproducts() {
               placeholder="Ingrese el proveedor del producto"
               className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-          </div>
-        </div>
-
-        {/* Antigüedad Del producto */}
-        <div>
-          <label
-            htmlFor="antiguedad"
-            className="block text-sm font-medium text-blue-500 mb-1"
-          >
-            Antigüedad Del producto
-          </label>
-          <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-              <Clock size={18} />
-            </span>
-            <select
-              id="antiguedad"
-              name="antiguedad"
-              value={formData.antiguedad}
-              onChange={handleChange}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none bg-white"
-            >
-              <option value="">Seleccione una opción</option>
-              <option value="nuevo">Nuevo</option>
-              <option value="antiguo">Antiguo</option>
-            </select>
           </div>
         </div>
 
