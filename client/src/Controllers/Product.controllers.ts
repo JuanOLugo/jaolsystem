@@ -29,3 +29,10 @@ export const DeleteProduct = async (data: object): Promise<any> => {
   return response;
 };
 
+
+export const UpdateProduct = async (data: object): Promise<any> => {
+  const response = await axios.post(proxyUrl + "/product/update", data, {headers: axiosConfigHeader});
+  return response;
+};
+
+

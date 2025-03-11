@@ -9,21 +9,27 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { DeleteProduct, GetMyProducts } from "../../Controllers/Product.controllers";
+import {
+  DeleteProduct,
+  GetMyProducts,
+  UpdateProduct,
+} from "../../Controllers/Product.controllers";
 import ErrorToast from "../toast/ErrorToast";
-import { Errorhandle } from "../toast/ToastFunctions/ErrorHandle";
+import { Errorhandle, Succeshandle } from "../toast/ToastFunctions/ErrorHandle";
+import EditProductModal from "./EditProductModal";
+import SuccessToast from "../toast/SuccesToast";
 
 // Tipo para un producto
-type Product = {
+export type Product = {
   _id: string;
-  nombre: String;
-  precioDeCosto: Number;
-  precioDeVenta: Number;
-  stock: Number;
-  codigoBarra: String;
-  proveedorNombre: String;
+  nombre: string;
+  precioDeCosto: number;
+  precioDeVenta: number;
+  stock: number;
+  codigoBarra: string;
+  proveedorNombre: string;
   creadoEn: string;
-  actualizadoEn: String;
+  actualizadoEn: string;
 };
 
 // Datos de ejemplo
@@ -36,7 +42,11 @@ const ProductTable: React.FC = () => {
   const [Error, setError] = useState("");
   const [ProductQuantity, setProductQuantity] = useState(0);
   const [Calls, setCalls] = useState(0);
+  const [OnClose, setOnClose] = useState(true);
+  const [IsOpen, setIsOpen] = useState(false);
+  const [Success, setSuccess] = useState("")
 
+  const [ProductToEdit, setProductToEdit] = useState<Product | null>(null);
   // Función para manejar la búsqueda
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -53,22 +63,46 @@ const ProductTable: React.FC = () => {
     }
   };
 
-
-
   // Obtener productos
   useEffect(() => {
     GetMyProducts({ cantidad: 50, skip: Calls, filterProduct: searchTerm })
       .then((response) => {
         setProducts(response.data.data);
         setProductQuantity(response.data.length);
-        console.log("1")
+        console.log("1");
       })
       .catch(() => Errorhandle("Algo fallo en el servidor", setError));
-      
   }, [Calls, searchTerm]);
+
+  const onSave = async (product: Product) => {
+    console.log(product);
+    await UpdateProduct(product)
+      .then((res) => Succeshandle(res.data.msg, setSuccess))
+      .catch((err) => Errorhandle("Algo fallo en el servidor", setError));
+    const newProductsTable = products.map((p) =>
+      p._id === product._id ? product : p
+    );
+    setProducts(newProductsTable);
+    onClose(product);
+  };
+
+  const onClose = async (product: Product) => {
+    setProductToEdit(product);
+    setIsOpen(false);
+    setOnClose(true);
+    return;
+  };
 
   return (
     <div className="min-h-screen h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
+      <ErrorToast error={Error} />
+      <SuccessToast success={Success}/>
+      <EditProductModal
+        onSave={onSave}
+        isOpen={IsOpen}
+        onClose={onClose}
+        product={!ProductToEdit ? null : ProductToEdit}
+      />
       <div className="max-w-7xl mx-auto   h-[90%] ">
         <h1 className="text-2xl font-semibold text-gray-800 mb-6">
           Tabla de Productos
@@ -95,8 +129,8 @@ const ProductTable: React.FC = () => {
                 {[
                   "Código",
                   "Nombre",
-                  "Precio Venta",
                   "Precio Costo",
+                  "Precio Venta",
                   "Proveedor",
                   "Stock",
                   "Última Actualización",
@@ -135,11 +169,12 @@ const ProductTable: React.FC = () => {
                     {product.nombre}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${product.precioDeVenta.toFixed(2)}
+                    ${product.precioDeCosto.toLocaleString("es-co")}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${product.precioDeCosto.toFixed(2)}
+                    ${product.precioDeVenta.toLocaleString("es-co")}
                   </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {product.proveedorNombre}
                   </td>
@@ -150,18 +185,33 @@ const ProductTable: React.FC = () => {
                     {product.actualizadoEn}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
+                    <button
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      onClick={() => {
+                        setProductToEdit(product);
+                        setIsOpen(true);
+                      }}
+                    >
                       <Edit size={18} />
                     </button>
                     <button className="text-red-600 hover:text-red-900">
-                      <Trash2 size={18} onClick={async () => {
-                        // Eliminar producto
-                       await DeleteProduct({ ProductId: product._id }).then(()=> {
-                        const NewProductsSet = products.filter(p => p._id!== product._id);
-                        setProducts(NewProductsSet);
-                        setProductQuantity(ProductQuantity - 1)
-                       }).catch(() => Errorhandle("Algo fallo en el servidor", setError));
-                      }}/>
+                      <Trash2
+                        size={18}
+                        onClick={async () => {
+                          // Eliminar producto
+                          await DeleteProduct({ ProductId: product._id })
+                            .then(() => {
+                              const NewProductsSet = products.filter(
+                                (p) => p._id !== product._id
+                              );
+                              setProducts(NewProductsSet);
+                              setProductQuantity(ProductQuantity - 1);
+                            })
+                            .catch(() =>
+                              Errorhandle("Algo fallo en el servidor", setError)
+                            );
+                        }}
+                      />
                     </button>
                   </td>
                 </tr>

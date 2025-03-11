@@ -111,3 +111,41 @@ export const DeleteProduct = async (
     console.log(error);
   }
 };
+
+export const UpdateProduct = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const UserId = (req.user as { _id: string })?._id;
+  const {
+    actualizadoEn,
+    nombre,
+
+    precioDeCosto,
+
+    precioDeVenta,
+
+    proveedorNombre,
+
+    stock,
+
+    _id,
+  } = req.body;
+  if (UserId === "" || !_id) return res.status(400).send({ msg: "No auth" });
+
+  try {
+    const productUpdate = await ProductoModel.findByIdAndUpdate(_id, {
+      nombre,
+      precioDeCosto,
+      precioDeVenta,
+      proveedorNombre,
+      stock,
+      actualizadoEn,
+    });
+
+    res.status(200).send({ msg: "Producto actualizado" });
+  } catch (error) {
+    res.status(500).send({ error: "Error al actualizar el producto" });
+    console.log(error);
+  }
+};
