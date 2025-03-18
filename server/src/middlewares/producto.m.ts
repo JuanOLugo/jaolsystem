@@ -149,3 +149,23 @@ export const UpdateProduct = async (
     console.log(error);
   }
 };
+
+export const FilterProductByCode = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const UserId = (req.user as { _id: string })?._id;
+  const {
+    code
+  } = req.params;
+  if (UserId === "" || !code) return res.status(400).send({ msg: "No auth" });
+
+  const BuscarProductoPorCodigo = await ProductoModel.findOne({
+    codigoBarra: code,
+    usuariocontenedor: UserId,
+  });
+
+  if (!BuscarProductoPorCodigo) return res.status(404).send({ msg: "Producto no encontrado" });
+  res.status(200).send({ data: BuscarProductoPorCodigo });
+  
+};

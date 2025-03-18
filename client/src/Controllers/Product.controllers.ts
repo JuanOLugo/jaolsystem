@@ -35,4 +35,11 @@ export const UpdateProduct = async (data: object): Promise<any> => {
   return response;
 };
 
+export const ProductByCode = async (data: string): Promise<any> => {
+  if(data.length !== 4) return new Promise((resolve, reject) => reject("Codigo no valido"))
+  const response = await axios.get(proxyUrl + "/product/getPbyCode/" + data, {headers: axiosConfigHeader});
+  return response;
+};
+
+
 

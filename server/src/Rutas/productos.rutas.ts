@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { CreateCode, CreateProduct, DeleteProduct, GetMyProducts, UpdateProduct} from "../middlewares/producto.m";
+import { CreateCode, CreateProduct, DeleteProduct, FilterProductByCode, GetMyProducts, UpdateProduct} from "../middlewares/producto.m";
 import { PassportStrategy } from "../Autentificacion/Passport.config";
 
 const productoRutas = Router();
@@ -32,5 +32,11 @@ productoRutas.post(
   "/update",
   PassportStrategy.authenticate("jwt", { session: false }),
   UpdateProduct
+);
+
+productoRutas.get(
+  "/getPbyCode/:code",
+  PassportStrategy.authenticate("jwt", { session: false }),
+  FilterProductByCode
 );
 export default productoRutas;
