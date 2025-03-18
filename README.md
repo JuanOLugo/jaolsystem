@@ -2,14 +2,12 @@
 
 JAOL System es una aplicación de gestión de inventario y facturación diseñada para pequeños y medianos negocios. Este sistema permite administrar productos, generar facturas y controlar ventas de manera eficiente.
 
-## Características Principales
-- 📦 **Gestión de Inventario**: Agrega, edita y elimina productos.
-- 🧾 **Facturación**: Crea y administra facturas con múltiples métodos de pago.
-- 📊 **Reportes y Análisis**: Visualización de ventas mediante gráficos interactivos.
-- 🔐 **Autenticación Segura**: Manejo de usuarios con JWT y encriptación de contraseñas.
-- 🌐 **Interfaz Moderna**: Desarrollada con React y TailwindCSS para una experiencia rápida y fluida.
-
----
+## 📦 Características Principales
+- **Gestión de Inventario**: Agrega, edita y elimina productos.
+- **Facturación**: Crea y administra facturas con múltiples métodos de pago.
+- **Reportes y Análisis**: Visualización de ventas mediante gráficos interactivos.
+- **Autenticación Segura**: Manejo de usuarios con JWT y encriptación de contraseñas.
+- **Interfaz Moderna**: Desarrollada con React y TailwindCSS para una experiencia rápida y fluida.
 
 ## 🚀 Tecnologías Utilizadas
 
@@ -27,10 +25,7 @@ JAOL System es una aplicación de gestión de inventario y facturación diseñad
 - [bcryptjs](https://www.npmjs.com/package/bcryptjs) para encriptación de contraseñas
 - [Passport](http://www.passportjs.org/) y [CORS](https://www.npmjs.com/package/cors)
 
----
-
 ## 📂 Estructura del Proyecto
-
 ```
 JAOL.app/
 ├── client/      # Frontend
@@ -46,13 +41,12 @@ JAOL.app/
 │   └── docker-compose.yml
 ```
 
----
-
 ## 🛠️ Instalación y Configuración
 
 ### **Requisitos Previos**
 - [Node.js](https://nodejs.org/) instalado
 - [MongoDB](https://www.mongodb.com/) en ejecución
+- [Docker](https://www.docker.com/) instalado (opcional, para despliegue)
 
 ### **Pasos de Instalación**
 1. Clonar el repositorio:
@@ -90,15 +84,13 @@ JAOL.app/
    npm run dev
    ```
 
----
+6. **Ejecutar con Docker** (opcional):
+   ```sh
+   docker-compose up --build
+   ```
 
 ## 📢 Contribuciones
-
 Si deseas contribuir, por favor abre un **issue** o envía un **pull request** con mejoras y sugerencias.
 
----
-
 ## 📜 Licencia
-
 Este proyecto está bajo la licencia **MIT**. ¡Úsalo libremente! 🚀
-
