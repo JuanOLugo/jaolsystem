@@ -19,3 +19,10 @@ export const GetInvoice = async (date: string): Promise<any> => {
   });
   return response;
 };
+
+export const DeleteInvoice = async (invoiceId: string): Promise<any> => {
+  const response = await axios.post(proxyUrl + `/invoice/DELETE`, {invoiceId} , {
+    headers: axiosConfigHeader,
+  });
+  return response;
+};

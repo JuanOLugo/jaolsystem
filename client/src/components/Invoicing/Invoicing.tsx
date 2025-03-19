@@ -60,6 +60,7 @@ const Invoicing: React.FC = () => {
   const [OnClose, setOnClose] = useState(true);
   const [IsOpen, setIsOpen] = useState(false);
   const [Total, setTotal] = useState(0);
+  
 
   const onSave = async (paymentData: { amountPaid: number; change: number, paymentMethod: string }) => {
     const tosend = {

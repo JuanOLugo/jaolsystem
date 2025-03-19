@@ -6,6 +6,7 @@ import FacturaModel from "../BaseDeDatos/Modelos/Factura.model";
 import ProductoEnFacturaModel, {
   IProductoEnFactura,
 } from "../BaseDeDatos/Modelos/ProductoEnFactura.model";
+import ProductoModel from "../BaseDeDatos/Modelos/Producto.model";
 
 const SECRET_KEY = process.env.SECRET_KEY ?? "123456789";
 
@@ -103,5 +104,88 @@ export const UserBasic = async (req: Request, res: Response): Promise<any> => {
     }
   } catch (error) {
     return res.status(500).send({ msg: "Error al obtener informacion" });
+  }
+};
+
+export const GetTotalDashboard = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { _id } = req.user as { _id: "" };
+  const { date } = req.body;
+
+  if (!date || _id.length == 0)
+    return res.status(404).send({ msg: "No data provided" });
+
+  try {
+    // Obtener cantidad de productos por mes
+    const Productos = await ProductoModel.find({ usuariocontenedor: _id });
+
+    // Convertir "day/month/year" a "YYYY-MM-DD"
+    const [day, month, year] = date.split("/");
+    const formattedDate = new Date(`${year}-${month}-${day}`);
+
+    const mes = formattedDate.getMonth() + 1; // Obtener mes correcto (1-12)
+
+    // Filtrar productos del mes actual
+    const productosMesActual = Productos.filter((p) => {
+      const [day, month, year] = p.creadoEn.split("/");
+      const formattedDate = new Date(`${year}-${month}-${day}`);
+      return new Date(formattedDate).getMonth() + 1 === mes;
+    }).length;
+
+    // Filtrar productos del mes anterior
+    const productosMesAnterior = Productos.filter((p) => {
+      const [day, month, year] = p.creadoEn.split("/");
+      const formattedDate = new Date(`${year}-${month}-${day}`);
+      return new Date(formattedDate).getMonth() + 1 === mes - 1;
+    }).length;
+
+    // Obtener facturas del usuario
+    const facturas = await FacturaModel.find({ usuariocontenedor: _id });
+
+    const arrayDeMeses = [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+    ];
+
+    const VentasPorMes = arrayDeMeses.map((mes) => {
+      const total = facturas
+        .filter((p) => {
+          const [day, month, year] = p.creadoEn.split("/");
+          const formattedDate = new Date(`${year}-${month}-${day}`);
+          return new Date(formattedDate).getMonth() + 1 === parseInt(mes);
+        })
+        .reduce((sum, p) => sum + p.total, 0);
+
+      return { mes, total };
+    });
+
+    const UltimasDosventas = await FacturaModel.find({
+      usuariocontenedor: _id,
+    })
+    console.log(UltimasDosventas)
+    res.status(200).send({
+      VentasPorMes,
+      facturas: facturas.length,
+      productosMesActual,
+      productosMesAnterior,
+      UltimasDosventas: UltimasDosventas.slice(-2),
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      msg: "Error al obtener información",
+    });
   }
 };

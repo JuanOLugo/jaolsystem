@@ -3,8 +3,24 @@ import { Information } from "./Components/Information";
 import { SellsPerMonth } from "./Components/SellsPerMonth";
 import { Userinfo } from "./Components/Userinfo";
 import { useEffect, useState } from "react";
-import { GetUserInfo } from "../../Controllers/User.controllers";
+import {
+  GetDashBoardInfo,
+  GetUserInfo,
+} from "../../Controllers/User.controllers";
+import { Sale } from "../Sales/Sales-table";
 
+export interface VentasPorMes {
+  mes: number;
+  total: number;
+}
+
+interface DatosVentas {
+  VentasPorMes: VentasPorMes[];
+  facturas: number;
+  productosMesActual: number;
+  productosMesAnterior: number;
+  UltimasDosventas: Sale[]
+}
 
 export function Dashboard() {
   //Obtener cantidad de productos vendidos
@@ -16,20 +32,32 @@ export function Dashboard() {
   //obtener array de ventas por mes
 
   // obtener user info
-  const date = new Date().toLocaleDateString("es-co")
-  const [UserInfo, setUserInfo] = useState(null)
+  const date = new Date().toLocaleDateString("es-co");
+  const [UserInfo, setUserInfo] = useState(null);
+  const [DashboardData, setDashboardData] = useState<DatosVentas>();
 
   useEffect(() => {
-    if(localStorage.getItem("user")){
-      GetUserInfo({date}).then(data => {
-        const {user} =data.data
-        const {correo, creadoEn, estado, _id, __v, ...resto} = user
-        setUserInfo(resto)
-      }).catch(err => console.log(err))
+    if (localStorage.getItem("user")) {
+      GetUserInfo({ date })
+        .then((data) => {
+          const { user } = data.data;
+          const { correo, creadoEn, estado, _id, __v, ...resto } = user;
+          setUserInfo(resto);
+          GetDashBoardInfo(date).then((data) => {
+            console.log(data);
+            setDashboardData(data.data);
+          });
+        })
+        .catch((err) => console.log(err));
     }
-  }, [])
-  
+  }, []);
 
+  function calcularPorcentajeCambio(antes: number, ahora: number) {
+    if (antes === 0) {
+      return ahora > 0 ? "+100" : "Sin cambio";
+    }
+    return ((ahora - antes) / antes) * 100;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
@@ -41,25 +69,38 @@ export function Dashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Information
-          title="Ventas"
-          value="123"
+          title="Ventas del mes"
+          value={
+            DashboardData?.VentasPorMes
+              ? DashboardData.VentasPorMes[
+                  new Date().getMonth()
+                ].total.toString()
+              : "0"
+          }
           icon={<HandCoins size={24} className="text-blue-500" />}
-          trend="+12.5%"
+          trend=""
           trendUp={true}
         />
         <Information
           title="Facturas"
-          value="123"
+          value={DashboardData?.facturas.toString() ?? "0"}
           icon={<FileText size={24} className="text-blue-500" />}
-          trend="+5.2%"
+          trend=""
           trendUp={true}
         />
         <Information
           title="Productos"
-          value="123"
+          value={DashboardData?.productosMesActual.toString() ?? "0"}
           icon={<Package size={24} className="text-blue-500" />}
-          trend="-2.1%"
-          trendUp={false}
+          trend={
+            DashboardData
+              ? calcularPorcentajeCambio(
+                  DashboardData?.productosMesAnterior ?? 0,
+                  DashboardData?.productosMesActual ?? 0
+                ).toString() + "%"
+              : "0"
+          }
+          trendUp={true}
         />
       </div>
 
@@ -67,17 +108,22 @@ export function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Chart Section */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm p-6">
-          <SellsPerMonth />
+          <SellsPerMonth dataVentas={DashboardData?.VentasPorMes ?? []} />
         </div>
 
         {/* User Info Section */}
         <div className="bg-white rounded-2xl shadow-sm p-6">
-          <Userinfo Sales={[]} Usern={UserInfo ?? {
-            rol: "Cargando...",
-            nombreusuario: "Cargando..."
-          }} />
+          <Userinfo
+            Sales={DashboardData?.UltimasDosventas ? DashboardData?.UltimasDosventas : []}
+            Usern={
+              UserInfo ?? {
+                rol: "Cargando...",
+                nombreusuario: "Cargando...",
+              }
+            }
+          />
         </div>
       </div>
     </div>
-  ); 
+  );
 }

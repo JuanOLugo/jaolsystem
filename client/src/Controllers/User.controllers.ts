@@ -37,3 +37,10 @@ export const GetUserInfo = async (data: IUserinfo): Promise<any> => {
   });
   return response;
 };
+
+export const GetDashBoardInfo = async (date: string): Promise<any> => {
+  const response = await axios.post(proxyUrl + "/auth/dashboardinfo", {date}, {
+    headers: axiosConfigHeader,
+  });
+  return response;
+};

@@ -10,10 +10,13 @@ import {
   ChevronUp,
   Calendar,
 } from "lucide-react";
-import { GetInvoice } from "../../Controllers/Invoice.controllers";
+import {
+  DeleteInvoice,
+  GetInvoice,
+} from "../../Controllers/Invoice.controllers";
 
 // Tipo para una venta
-interface Sale {
+export interface Sale {
   _id: string;
   actualizadoEn: string;
   clienteContacto: string;
@@ -35,9 +38,7 @@ const SalesTable: React.FC = () => {
   const [sortColumn, setSortColumn] = useState<keyof Sale | "">("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [profit, setProfit] = useState(0);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const date = new Date().toLocaleDateString("es-co");
+  const [Fecha, setFecha] = useState(new Date().toLocaleDateString("es-co"));
 
   // Función para manejar la búsqueda
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,18 +56,31 @@ const SalesTable: React.FC = () => {
   };
 
   useEffect(() => {
-    GetInvoice(date).then((data) => {
-      console.log(data)
+    GetInvoice(Fecha).then((data) => {
+      console.log(data);
       setSales(data.data.facturas);
       setProfit(data.data.totalWin);
     });
-  }, []);
+    console.log(Fecha);
+  }, [Fecha]);
 
   const [totalSales, settotalSales] = useState(0);
 
+  const handleDeleteInvoice = (invoiceid: string) => {
+    console.log(invoiceid);
+    DeleteInvoice(invoiceid)
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
+
+    setSales((prev) => prev.filter(s => s._id !== invoiceid))
+    window.location.reload();
+  };
+
   // Filtrar y ordenar ventas
   useEffect(() => {
-    if(sales){
+    if (sales) {
       settotalSales(sales.reduce((sum, sale) => sum + sale.total, 0));
     }
   }, [sales]);
@@ -98,15 +112,15 @@ const SalesTable: React.FC = () => {
             <input
               type="date"
               className="p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <span>a</span>
-            <input
-              type="date"
-              className="p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                const fechaISO = e.target.value;
+                const [year, month, day] = fechaISO.split("-");
+
+                const fechaFinal = `${parseInt(day)}/${parseInt(
+                  month
+                )}/${year}`;
+                setFecha(fechaFinal);
+              }}
             />
           </div>
         </div>
@@ -162,7 +176,10 @@ const SalesTable: React.FC = () => {
                       <button className="text-blue-600 hover:text-blue-900 mr-3">
                         <Eye size={18} />
                       </button>
-                      <button className="text-red-600 hover:text-red-900">
+                      <button
+                        onClick={() => handleDeleteInvoice(sale._id)}
+                        className="text-red-600 cursor-pointer hover:text-red-900"
+                      >
                         <Trash2 size={18} />
                       </button>
                     </td>

@@ -96,10 +96,10 @@ export const ObtenerFacturas = async (
   }: { paymentData: IPaymentData; products: IProduct[] } = req.body;
   const IdDeUsuario = (req.user as { _id: string })?._id;
   const { date } = req.body;
-
+  console.log(date);
   if (IdDeUsuario.length === 0) return res.status(404);
   //Obtener facturas del usaurio
-  const facturas = await FacturaModel.find({ usuariocontenedor: IdDeUsuario });
+  const facturas = await FacturaModel.find({ usuariocontenedor: IdDeUsuario, creadoEn: date });
 
   //Obtener el total ganado en el dia
   const ProductosToday = await ProductoEnFacturaModel.find({ creadoEn: date });
@@ -116,3 +116,40 @@ export const ObtenerFacturas = async (
     totalWin,
   });
 };
+
+export const EliminarFacturas = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  // Obtener los datos de la factura del cuerpo de la solicitud
+  const {
+    invoiceId
+  } = req.body;
+  const IdDeUsuario = (req.user as { _id: string })?._id;
+
+  if (IdDeUsuario.length === 0) return res.status(404);
+
+  //Obtener facturas del usaurio y eliminar junto a los productos
+  try {
+    await FacturaModel.findOneAndDelete({ _id: invoiceId });
+  const ProductosEnFactura = await ProductoEnFacturaModel.find({ facturacontenedora: invoiceId });
+  ProductosEnFactura.forEach(async (p) => {
+    const producto = await ProductoModel.findOne({ _id: p.productoId });
+    if (producto) {
+      producto.stock += p.cantidad;
+      await producto.save();
+    }
+    await ProductoEnFacturaModel.findOneAndDelete({ _id: p._id });
+  });
+
+  res.status(200).send({
+    message: "Factura eliminada correctamente",
+  });
+  } catch (error) {
+    res.status(500).send({
+      message: "Error al eliminar la factura",
+    });
+  }
+}
+
+
