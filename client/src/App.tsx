@@ -19,12 +19,12 @@ function App() {
         </Route>
 
         <Route element={<PrivateRoutes />}>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/create" element={<Createproducts/>} />
-        <Route path="/settings" element={<SettingsPage/>} />
-        <Route path="/products" element={<ProductTable/>} />
-        <Route path="/sales" element={<SalesTable/>} />
-        <Route path="/invoicing" element={<Invoicing/>} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/create" element={<Createproducts />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/products" element={<ProductTable />} />
+          <Route path="/sales" element={<SalesTable />} />
+          <Route path="/invoicing" element={<Invoicing />} />
         </Route>
 
         <Route path="*" element={<Page />} />

@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { ProductByCode } from "../../Controllers/Product.controllers";
 import SaveInvoiceModal from "./SaveInvoiceModal";
-import axios from "axios";
 import { SaveInvoice } from "../../Controllers/Invoice.controllers";
 
 type Product = {
@@ -60,16 +59,19 @@ const Invoicing: React.FC = () => {
   const [OnClose, setOnClose] = useState(true);
   const [IsOpen, setIsOpen] = useState(false);
   const [Total, setTotal] = useState(0);
-  
 
-  const onSave = async (paymentData: { amountPaid: number; change: number, paymentMethod: string }) => {
+  const onSave = async (paymentData: {
+    amountPaid: number;
+    change: number;
+    paymentMethod: string;
+  }) => {
     const tosend = {
       products,
-      paymentData
-    }
+      paymentData,
+    };
 
     //Send data to server
-    await SaveInvoice(tosend)
+    await SaveInvoice(tosend);
     console.log(tosend);
     setIsOpen(false);
     setOnClose(true);
@@ -88,7 +90,7 @@ const Invoicing: React.FC = () => {
       ...prev,
       [name]:
         name === "price" || name === "discount" || name === "quantity"
-          ? Number.parseFloat(value)
+          ? Number.parseInt(value)
           : value,
     }));
   };
@@ -97,10 +99,6 @@ const Invoicing: React.FC = () => {
     const { value } = e.target;
     setFormData((prev) => ({ ...prev, code: value.toUpperCase() }));
     try {
-      const response = await ProductByCode(value);
-      const { codigoBarra, nombre, precioDeVenta, stock, _id , precioDeCosto} =
-        response.data.data;
-
       const isOnArray = RecentProducts.find((p) => p.codigoBarra === value);
       if (isOnArray) {
         setFormData((prev) => ({
@@ -112,9 +110,18 @@ const Invoicing: React.FC = () => {
           realName: isOnArray.nombre,
           price: isOnArray.precioDeVenta,
           maxQuantity: isOnArray.stock,
-          priceCost: isOnArray.precioDeCosto
+          priceCost: isOnArray.precioDeCosto,
         }));
       } else {
+        const response = await ProductByCode(value);
+        const {
+          codigoBarra,
+          nombre,
+          precioDeVenta,
+          stock,
+          _id,
+          precioDeCosto,
+        } = response.data.data;
         setRecentProducts([...RecentProducts, response.data.data]);
         setFormData((prev) => ({
           ...prev,
@@ -125,7 +132,7 @@ const Invoicing: React.FC = () => {
           realName: nombre,
           price: parseInt(precioDeVenta),
           maxQuantity: stock,
-          priceCost: precioDeCosto
+          priceCost: precioDeCosto,
         }));
       }
     } catch (error) {
@@ -180,7 +187,7 @@ const Invoicing: React.FC = () => {
         quantity: 1,
         maxQuantity: 0,
         realName: "",
-        priceCost: 0
+        priceCost: 0,
       });
     }
   };

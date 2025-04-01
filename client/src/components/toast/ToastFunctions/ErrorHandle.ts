@@ -9,10 +9,10 @@ export const Errorhandle = (
 };
 
 export const Succeshandle = (
-    err: string,
+    Success: string,
     setSuccess: React.Dispatch<React.SetStateAction<string>>
   ) => {
-    setSuccess(err);
+    setSuccess(Success);
     setTimeout(() => {
       setSuccess("");
     }, 2000);

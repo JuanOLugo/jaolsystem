@@ -1,4 +1,4 @@
-import { FileText, HandCoins, Package } from "lucide-react";
+import { Calendar, FileText, HandCoins, Package } from "lucide-react";
 import { Information } from "./Components/Information";
 import { SellsPerMonth } from "./Components/SellsPerMonth";
 import { Userinfo } from "./Components/Userinfo";
@@ -62,9 +62,18 @@ export function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-blue-500">Dashboard</h1>
-      </div>
+      <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-blue-500">Dashboard</h1>
+            <p className="text-gray-500 mt-1 flex items-center">
+              <Calendar size={16} className="mr-1" />
+              {new Date().toLocaleDateString("es-ES", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

@@ -4,10 +4,10 @@ import { Eye, EyeOff, User, Mail, Lock, UserCircle } from "lucide-react";
 import {
   IUserRegisterControl,
   LoginUser,
-  RegisterUser
+  RegisterUser,
 } from "../../Controllers/User.controllers";
 import ErrorToast from "../toast/ErrorToast";
-import cookie from "js-cookie"
+import cookie from "js-cookie";
 import { Errorhandle } from "../toast/ToastFunctions/ErrorHandle";
 
 type FormType = "login" | "register";
@@ -48,14 +48,18 @@ const AuthForms: React.FC = () => {
     setFormType(formType === "login" ? "register" : "login");
   };
 
-
-
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (formType === "login") {
       if (UserLogin.email.length > 1 && UserLogin.password.length > 1) {
         LoginUser(UserLogin)
-          .then((data) => console.log(data))
+          .then((data) => {
+            const tokencookie = cookie.get("token");
+            if (tokencookie) {
+              localStorage.setItem("user", tokencookie);
+              window.location.reload();
+            }
+          })
           .catch((err) => Errorhandle(err.response.data.msg, setError));
         return;
       } else {
@@ -87,16 +91,16 @@ const AuthForms: React.FC = () => {
           createdIn: date,
         };
 
-        RegisterUser(data).then(data => {
-          console.log(data)
-          const tokencookie = cookie.get("token")
-          if(tokencookie) {
-            localStorage.setItem("user", tokencookie)
-            window.location.reload()
-          }
-          else Errorhandle("Error to set user, try again", setError)
-
-        }).catch(err => Errorhandle(err.response.data.msg, setError));
+        RegisterUser(data)
+          .then((data) => {
+            console.log(data);
+            const tokencookie = cookie.get("token");
+            if (tokencookie) {
+              localStorage.setItem("user", tokencookie);
+              window.location.reload();
+            } else Errorhandle("Error to set user, try again", setError);
+          })
+          .catch((err) => Errorhandle(err.response.data.msg, setError));
       } else Errorhandle("Rellene las credenciales", setError);
     }
   };

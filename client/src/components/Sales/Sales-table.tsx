@@ -13,7 +13,10 @@ import {
 import {
   DeleteInvoice,
   GetInvoice,
+  GetProductInvoice,
+  UpdateInvoice,
 } from "../../Controllers/Invoice.controllers";
+import InvoiceEditModal, { InvoiceItem } from "./InvoiceEditModal";
 
 // Tipo para una venta
 export interface Sale {
@@ -32,6 +35,9 @@ export interface Sale {
   __v: number;
 }
 
+
+
+
 const SalesTable: React.FC = () => {
   const [sales, setSales] = useState<Array<Sale>>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,7 +45,8 @@ const SalesTable: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [profit, setProfit] = useState(0);
   const [Fecha, setFecha] = useState(new Date().toLocaleDateString("es-co"));
-
+  const [IsOpen, setIsOpen] = useState(false);
+  const [invoiceProducts, setinvoiceProducts] = useState<Array<InvoiceItem>>([])
   // Función para manejar la búsqueda
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -74,7 +81,7 @@ const SalesTable: React.FC = () => {
       })
       .catch((err) => console.log(err));
 
-    setSales((prev) => prev.filter(s => s._id !== invoiceid))
+    setSales((prev) => prev.filter((s) => s._id !== invoiceid));
     window.location.reload();
   };
 
@@ -85,8 +92,23 @@ const SalesTable: React.FC = () => {
     }
   }, [sales]);
 
+  const OnClose = () => setIsOpen(false);
+  const OnSave = (products: InvoiceItem[]) => {
+    UpdateInvoice(products).then(data => console.log(data)).catch(err => console.log(err))
+    setIsOpen(false);
+    window.location.reload();
+  }
+
+  useEffect(() => {
+    if(invoiceProducts.length > 0){
+      setIsOpen(true)
+    }
+  }, [invoiceProducts])
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+      <InvoiceEditModal isOpen={IsOpen} onClose={OnClose} onSave={OnSave}  invoiceProducts={invoiceProducts}/>
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl font-semibold text-gray-800 mb-6">
           Tabla de Ventas
@@ -116,10 +138,8 @@ const SalesTable: React.FC = () => {
                 const fechaISO = e.target.value;
                 const [year, month, day] = fechaISO.split("-");
 
-                const fechaFinal = `${parseInt(day)}/${parseInt(
-                  month
-                )}/${year}`;
-                setFecha(fechaFinal);
+                console.log(year, month, day);
+                setFecha(`${day}/${parseInt(month)}/${year}`);
               }}
             />
           </div>
@@ -173,7 +193,14 @@ const SalesTable: React.FC = () => {
                       {sale.creadoEn}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-blue-600 hover:text-blue-900 mr-3">
+                      <button className="text-blue-600 hover:text-blue-900 mr-3" onClick={async () => {
+                        await GetProductInvoice(sale._id).then((data) => {
+                          setinvoiceProducts(data.data.ProductosEnFactura)
+                          console.log(data.data.ProductosEnFactura)
+                          
+                        }).catch((err) => console.log(err));
+                        
+                      }}>
                         <Eye size={18} />
                       </button>
                       <button
