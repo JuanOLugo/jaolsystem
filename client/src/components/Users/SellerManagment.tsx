@@ -31,6 +31,13 @@ export type Seller = {
   createdAt: string;
 };
 
+
+export type Vendedor = {
+  vendedor: Seller,
+  totalDeVentas: number,
+  totalDeMonto: number,
+}
+
 const SellerManagement: React.FC = () => {
   // Estado para la lista de vendedores
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -50,7 +57,7 @@ const SellerManagement: React.FC = () => {
 
   useEffect(() => {
     GetSellers()
-      .then((data) => setSellers(data.data.map((e: any) => {
+      .then((data) => setSellers(data.data.map((e: Vendedor) => {
         return {
           ...e.vendedor,
           totalSales: e.totalDeVentas,

@@ -13,7 +13,7 @@ import { ProductByCode } from "../../Controllers/Product.controllers";
 import SaveInvoiceModal from "./SaveInvoiceModal";
 import { SaveInvoice } from "../../Controllers/Invoice.controllers";
 import { GetSellers } from "../../Controllers/Seller.controllers";
-import { Seller } from "../Users/SellerManagment";
+import { Seller, Vendedor } from "../Users/SellerManagment";
 
 type Product = {
   id: string;
@@ -52,9 +52,8 @@ const Invoicing: React.FC = () => {
     quantity: 1,
     maxQuantity: 0,
     realName: "",
-  
   });
-  const [IndividualSeller, setIndividualSeller] = useState("")
+  const [IndividualSeller, setIndividualSeller] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [RecentProducts, setRecentProducts] = useState<Array<RecentProducts>>(
     []
@@ -62,14 +61,13 @@ const Invoicing: React.FC = () => {
   const [OnClose, setOnClose] = useState(true);
   const [IsOpen, setIsOpen] = useState(false);
   const [Total, setTotal] = useState(0);
-  const [Sellers, setSellers] = useState<Array<Seller>>([])
+  const [Sellers, setSellers] = useState<Array<Seller>>([]);
 
   useEffect(() => {
-      GetSellers()
-        .then((data) => setSellers(data.data.map(e => e.vendedor)))
-        .catch((err) => console.log(err));
-    }, []);
-
+    GetSellers()
+      .then((data) => setSellers(data.data.map((e: Vendedor) => e.vendedor)))
+      .catch((err) => console.log(err));
+  }, []);
 
   const onSave = async (paymentData: {
     amountPaid: number;
@@ -78,7 +76,7 @@ const Invoicing: React.FC = () => {
   }) => {
     const tosend = {
       products,
-      paymentData: {...paymentData, seller: IndividualSeller},
+      paymentData: { ...paymentData, seller: IndividualSeller },
     };
 
     //Send data to server
@@ -179,7 +177,7 @@ const Invoicing: React.FC = () => {
           return product;
         });
         setProducts(ChangeQuantity);
-      } else setProducts((prev) => [...prev, { ...formData}]);
+      } else setProducts((prev) => [...prev, { ...formData }]);
 
       const ChangeProductStock = RecentProducts.filter((p) => {
         if (p._id === formData.id) {
@@ -199,7 +197,6 @@ const Invoicing: React.FC = () => {
         maxQuantity: 0,
         realName: "",
         priceCost: 0,
-
       });
     }
   };
@@ -237,7 +234,7 @@ const Invoicing: React.FC = () => {
               Agregar Producto
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+              <div>
                 <label
                   htmlFor="code"
                   className="block text-sm font-medium text-gray-700 mb-1"
@@ -245,16 +242,19 @@ const Invoicing: React.FC = () => {
                   Seleccionar vendedor
                 </label>
                 <div className="relative">
-
-                  <select name="vendedores" id="" onChange={(e) => {
-                    setIndividualSeller(e.target.value);
-                  }}>
+                  <select
+                    name="vendedores"
+                    id=""
+                    onChange={(e) => {
+                      setIndividualSeller(e.target.value);
+                    }}
+                  >
                     <option value="local">Local</option>
-                      {Sellers.map((seller) => (
-                        <option key={seller._id} value={seller._id}>
-                          {seller.firstName} {seller.lastName}
-                        </option>
-                      ))}
+                    {Sellers.map((seller) => (
+                      <option key={seller._id} value={seller._id}>
+                        {seller.firstName} {seller.lastName}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
