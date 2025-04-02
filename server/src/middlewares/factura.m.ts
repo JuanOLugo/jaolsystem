@@ -11,6 +11,7 @@ interface IPaymentData {
   change: number;
   paymentMethod: string;
   transactionId?: string;
+  seller: string;
 }
 
 interface IProduct {
@@ -35,6 +36,7 @@ export type Product = {
   proveedorNombre: string;
   creadoEn: string;
   actualizadoEn: string;
+  seller: string
 };
 
 export interface InvoiceItem {
@@ -67,6 +69,7 @@ export const GuardarFatura = async (
       (acc, product) => acc + product.discount * product.quantity,
       0
     ),
+    vendedorId: new mongoose.Types.ObjectId(paymentData.seller),
     metodoPago: paymentData.paymentMethod,
     estado: "Pagado",
     creditoActivo: false,

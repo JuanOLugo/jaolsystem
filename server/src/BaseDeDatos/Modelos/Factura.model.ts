@@ -5,6 +5,7 @@ type FechaTipo = `${string}-${string}-${string}`;
 // Interfaz de la factura
 interface IFactura {
   clienteNombre: string;
+  vendedorId: mongoose.Schema.Types.ObjectId,
   clienteContacto: string;
   total: number;
   descuentoTotal: number;
@@ -20,6 +21,7 @@ interface IFactura {
 // Schema de la factura
 const SchemaFactura = new Schema<IFactura>({
   clienteNombre: { type: String, required: true },
+  vendedorId: {type: mongoose.Schema.Types.ObjectId, required: true, ref: "Vendedor"},
   clienteContacto: { type: String, required: true },
   total: { type: Number, required: true },
   descuentoTotal: { type: Number, required: true },

@@ -42,7 +42,7 @@ function Navbar({ children }: { children: ReactNode }) {
       icon: <Barcode />,
     },
     {
-      href: "/users",
+      href: "/sellermanagement",
       text: "Users",
       icon: <User />,
     },
