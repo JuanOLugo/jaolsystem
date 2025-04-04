@@ -7,6 +7,7 @@ import {
 } from "../middlewares/usuario.m";
 import { PassportStrategy } from "../Autentificacion/Passport.config";
 import passport from "passport";
+
 const usuarioRutas = Router();
 
 usuarioRutas.post("/login", InicioSesionUsuario);
@@ -21,5 +22,7 @@ usuarioRutas.post(
   PassportStrategy.authenticate("jwt", { session: false }),
   GetTotalDashboard
 );
+
+
 
 export default usuarioRutas;

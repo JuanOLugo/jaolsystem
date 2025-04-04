@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Plus,
   X,
@@ -14,8 +14,9 @@ import SaveInvoiceModal from "./SaveInvoiceModal";
 import { SaveInvoice } from "../../Controllers/Invoice.controllers";
 import { GetSellers } from "../../Controllers/Seller.controllers";
 import { Seller, Vendedor } from "../Users/SellerManagment";
+import FilterProduct from "./FilterProduct";
 
-type Product = {
+export type Product = {
   id: string;
   code: string;
   name: string;
@@ -58,17 +59,22 @@ const Invoicing: React.FC = () => {
   const [RecentProducts, setRecentProducts] = useState<Array<RecentProducts>>(
     []
   );
+  // States for the modal
   const [OnClose, setOnClose] = useState(true);
   const [IsOpen, setIsOpen] = useState(false);
   const [Total, setTotal] = useState(0);
   const [Sellers, setSellers] = useState<Array<Seller>>([]);
+  const InputRefProductName = useRef<HTMLInputElement>(null);
 
+  // Refs
+  const InputRefCode = useRef<HTMLInputElement>(null);
   useEffect(() => {
     GetSellers()
       .then((data) => setSellers(data.data.map((e: Vendedor) => e.vendedor)))
       .catch((err) => console.log(err));
   }, []);
 
+  // Save the invoice
   const onSave = async (paymentData: {
     amountPaid: number;
     change: number;
@@ -93,6 +99,8 @@ const Invoicing: React.FC = () => {
     return;
   };
 
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -104,8 +112,8 @@ const Invoicing: React.FC = () => {
     }));
   };
 
-  const handleChangeCode = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+  const handleChangeCode = async (value: string) => {
+    //const { value } = e.target;
     setFormData((prev) => ({ ...prev, code: value.toUpperCase() }));
     try {
       const isOnArray = RecentProducts.find((p) => p.codigoBarra === value);
@@ -150,6 +158,14 @@ const Invoicing: React.FC = () => {
   };
 
   useEffect(() => {
+      if(formData.code.length > 0) {
+        handleChangeCode(formData.code);
+      }
+
+  }, [formData.code])
+  
+
+  useEffect(() => {
     if (products) {
       const TotalSell = products.reduce((total, product) => {
         const discountedPrice = product.price * (1 - product.discount / 100);
@@ -158,6 +174,9 @@ const Invoicing: React.FC = () => {
       setTotal(TotalSell);
     }
   }, [products]);
+
+
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -273,9 +292,10 @@ const Invoicing: React.FC = () => {
                   <input
                     type="text"
                     id="code"
+                    ref={InputRefCode}
                     name="code"
                     value={formData.code}
-                    onChange={handleChangeCode}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
                     className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Código del producto"
                     required
@@ -301,11 +321,13 @@ const Invoicing: React.FC = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
+                    ref={InputRefProductName}
                     className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Nombre del producto"
                     required
                   />
                 </div>
+                <FilterProduct searchTerm={formData.name} Ref={InputRefProductName} setCode={setFormData}/>
               </div>
 
               <div>

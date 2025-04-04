@@ -10,6 +10,7 @@ import ProductTable from "./components/Products/Product-table";
 import SalesTable from "./components/Sales/Sales-table";
 import Invoicing from "./components/Invoicing/Invoicing";
 import SellerManagement from "./components/Users/SellerManagment";
+import ReportsManagement from "./components/Reports/ReportsManagement";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/sales" element={<SalesTable />} />
           <Route path="/invoicing" element={<Invoicing />} />
           <Route path="/sellermanagement" element={<SellerManagement />} />
+          <Route path="/reports" element={<ReportsManagement />} />
         </Route>
 
         <Route path="*" element={<Page />} />

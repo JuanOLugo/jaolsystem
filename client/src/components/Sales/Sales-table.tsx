@@ -17,6 +17,7 @@ import {
   UpdateInvoice,
 } from "../../Controllers/Invoice.controllers";
 import InvoiceEditModal, { InvoiceItem } from "./InvoiceEditModal";
+import { Seller } from "../Users/SellerManagment";
 
 // Tipo para una venta
 export interface Sale {
@@ -26,6 +27,7 @@ export interface Sale {
   clienteNombre: string;
   creadoEn: string;
   creditoActivo: boolean;
+  vendedorId: Seller;
   descuentoTotal: number;
   estado: string;
   metodoPago: string;
@@ -34,6 +36,7 @@ export interface Sale {
   usuariocontenedor: string;
   __v: number;
 }
+
 
 
 
@@ -138,19 +141,19 @@ const SalesTable: React.FC = () => {
                 const fechaISO = e.target.value;
                 const [year, month, day] = fechaISO.split("-");
 
-                console.log(year, month, day);
-                setFecha(`${day}/${parseInt(month)}/${year}`);
+                console.log(year, month, parseInt(day));
+                setFecha(`${parseInt(day)}/${parseInt(month)}/${year}`);
               }}
             />
           </div>
         </div>
 
         {/* Tabla */}
-        <div className="overflow-x-auto bg-white rounded-xl shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
+        <div className="overflow-x-auto bg-white rounded-xl shadow-sm h-96 overflow-y-scroll">
+          <table className="min-w-full divide-y divide-gray-200 ">
             <thead className="bg-gray-50">
               <tr>
-                {["Código", "Comprador", "Total", "Fecha", "Acciones"].map(
+                {["Código", "Comprador", "Vendedor", "Total", "Fecha", "Acciones"].map(
                   (header, index) => (
                     <th
                       key={index}
@@ -174,7 +177,7 @@ const SalesTable: React.FC = () => {
                 )}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200 " >
               {!sales ? (
                 <h1>cargando</h1>
               ) : (
@@ -185,6 +188,9 @@ const SalesTable: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {sale.clienteNombre}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {sale.vendedorId ? sale.vendedorId.firstName : "Local"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       ${sale.total.toLocaleString("es-co")}

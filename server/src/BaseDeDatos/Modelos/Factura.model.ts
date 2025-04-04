@@ -18,7 +18,7 @@ interface IFactura {
   usuariocontenedor: mongoose.Schema.Types.ObjectId;
 }
 
-// Schema de la factura
+// Schema de la factura para la base de datos
 const SchemaFactura = new Schema<IFactura>({
   clienteNombre: { type: String, required: true },
   vendedorId: {type: mongoose.Schema.Types.ObjectId, required: true, ref: "Vendedor"},

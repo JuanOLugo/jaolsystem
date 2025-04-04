@@ -61,6 +61,7 @@ export const GuardarFatura = async (
   const IdDeUsuario = (req.user as { _id: string })?._id;
   if (IdDeUsuario.length === 0) return res.status(404);
   // Implementar el codigo para guardar la factura en la base de datos
+  
   const nuevaFactura = new FacturaModel({
     clienteNombre: "Local",
     clienteContacto: "Local",
@@ -69,7 +70,7 @@ export const GuardarFatura = async (
       (acc, product) => acc + product.discount * product.quantity,
       0
     ),
-    vendedorId: new mongoose.Types.ObjectId(paymentData.seller),
+    vendedorId: paymentData.seller.length > 0 ? paymentData.seller : IdDeUsuario,
     metodoPago: paymentData.paymentMethod,
     estado: "Pagado",
     creditoActivo: false,
@@ -128,7 +129,7 @@ export const ObtenerFacturas = async (
   const facturas = await FacturaModel.find({
     usuariocontenedor: IdDeUsuario,
     creadoEn: date,
-  });
+  }).populate("vendedorId");
 
   //Obtener el total ganado en el dia
   const ProductosToday = await ProductoEnFacturaModel.find({

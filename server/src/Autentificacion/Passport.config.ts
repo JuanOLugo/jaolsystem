@@ -8,7 +8,7 @@ const NuevaEstrategia: StrategyOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 };
 
-// Usar la estrategia con passport
+// Usar la estrategia con passport  
 passport.use(
   new Strategy(NuevaEstrategia, async (payload, done) => {
     try {

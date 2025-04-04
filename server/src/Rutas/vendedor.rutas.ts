@@ -7,7 +7,8 @@ import {
 } from "../middlewares/usuario.m";
 import { PassportStrategy } from "../Autentificacion/Passport.config";
 import passport from "passport";
-import { CrearVendedor, EditarVendedor, EliminarVendedor, ObtenerVendedor } from "../middlewares/vendedor.m";
+import { CrearVendedor, EditarReporte, EditarVendedor, EliminarReporte, EliminarVendedor, ObtenerVendedor } from "../middlewares/vendedor.m";
+import { GenerarReporte, ObtenerReportes } from "../middlewares/vendedor.m";
 const vendedorRutas = Router();
 
 vendedorRutas.post(
@@ -33,6 +34,32 @@ vendedorRutas.post(
   PassportStrategy.authenticate("jwt", { session: false }),
   EditarVendedor
 );
+
+vendedorRutas.post(
+  "/generatereports",
+  PassportStrategy.authenticate("jwt", { session: false }),
+  GenerarReporte
+);
+
+vendedorRutas.get(
+  "/getreports",
+  PassportStrategy.authenticate("jwt", { session: false }),
+  ObtenerReportes
+);
+
+vendedorRutas.post(
+  "/editreport",
+  PassportStrategy.authenticate("jwt", { session: false }),
+  EditarReporte
+);
+
+
+vendedorRutas.post(
+  "/deletereport",
+  PassportStrategy.authenticate("jwt", { session: false }),
+  EliminarReporte
+);
+
 
 
 export default vendedorRutas;
