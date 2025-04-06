@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   House,
+  LogOut,
   Package,
   PackagePlus,
   Settings,
@@ -14,7 +15,7 @@ import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 function Navbar({ children }: { children: ReactNode }) {
   const [NavbarState, setNavbarState] = useState(true);
-  const location = useLocation()
+  const location = useLocation();
   const urls = [
     {
       href: "/",
@@ -56,10 +57,14 @@ function Navbar({ children }: { children: ReactNode }) {
       text: "Settings",
       icon: <Settings />,
     },
+    {
+      text: "Logout",
+      icon: <LogOut />,
+    },
   ];
 
   return (
-    <div >
+    <div>
       <div className="flex ">
         <div
           className={`${
@@ -82,20 +87,46 @@ function Navbar({ children }: { children: ReactNode }) {
 
           <div className="space-y-2 my-5 ">
             {urls.map((url, index) => {
-              return (
-                <Link
-                  to={url.href}
-                  key={index}
-                  className={`flex ${
-                    NavbarState ? "mr-5 ml-1" : ""
-                  } font-light p-2  rounded-lg  ${location.pathname === url.href ? "bg-blue-50 text-blue-400" : "hover:text-blue-400 text-white  hover:bg-blue-50" } `}
-                >
-                  <label htmlFor="" className=" ">
-                    {url.icon}
-                  </label>
-                  {NavbarState ? <p className=" ml-3">{url.text}</p> : null}
-                </Link>
-              );
+              if (url.href) {
+                return (
+                  <Link
+                    to={url.href}
+                    key={index}
+                    className={`flex ${
+                      NavbarState ? "mr-5 ml-1" : ""
+                    } font-light p-2  rounded-lg  ${
+                      location.pathname === url.href
+                        ? "bg-blue-50 text-blue-400"
+                        : "hover:text-blue-400 text-white  hover:bg-blue-50"
+                    } `}
+                  >
+                    <label htmlFor="" className=" ">
+                      {url.icon}
+                    </label>
+                    {NavbarState ? <p className=" ml-3">{url.text}</p> : null}
+                  </Link>
+                );
+              } else {
+                return (
+                  <h1
+                    key={index}
+                    onClick={() => {
+                      if (url.text === "Logout") {
+                        localStorage.removeItem("user");
+                        window.location.reload();
+                      }
+                    }}
+                    className={`flex ${
+                      NavbarState ? "mr-5 ml-1" : ""
+                    } font-light p-2  rounded-lg  hover:text-white text-white hover:bg-blue-500 bg-blue-600 cursor-pointer`}
+                  >
+                    <label htmlFor="" className=" ">
+                      {url.icon}
+                    </label>
+                    {NavbarState ? <p className=" ml-3">{url.text}</p> : null}
+                  </h1>
+                );
+              }
             })}
           </div>
         </div>

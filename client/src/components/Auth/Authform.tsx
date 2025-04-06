@@ -42,6 +42,8 @@ const AuthForms: React.FC = () => {
     role: "admin",
   });
 
+  const [Loading, setLoading] = useState(false)
+
   const date = new Date().toLocaleDateString("es-co");
 
   const toggleForm = () => {
@@ -50,6 +52,7 @@ const AuthForms: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true)
     if (formType === "login") {
       if (UserLogin.email.length > 1 && UserLogin.password.length > 1) {
         LoginUser(UserLogin)
@@ -273,7 +276,8 @@ const AuthForms: React.FC = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
+              disabled={Loading}
+              className="group relative disabled:opacity-50 disabled:cursor-not-allowed w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-400 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400"
             >
               {formType === "login" ? "Iniciar sesión" : "Registrarse"}
             </button>
@@ -281,8 +285,9 @@ const AuthForms: React.FC = () => {
         </form>
         <div className="text-center">
           <button
+            
             onClick={toggleForm}
-            className="font-medium text-blue-400 hover:text-blue-600"
+            className="font-medium  text-blue-400 hover:text-blue-600"
           >
             {formType === "login"
               ? "¿No tienes una cuenta? Regístrate"
