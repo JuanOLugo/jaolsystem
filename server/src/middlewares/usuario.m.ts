@@ -7,8 +7,29 @@ import ProductoEnFacturaModel, {
   IProductoEnFactura,
 } from "../BaseDeDatos/Modelos/ProductoEnFactura.model";
 import ProductoModel from "../BaseDeDatos/Modelos/Producto.model";
+import nodemailer from "nodemailer";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: "pisstreamer@gmail.com", //your email address
+    pass: "xwrb pnzu dyjl kfbq", // or your App Password if using Gmail with 2FA
+  },
+  tls: {
+    rejectUnauthorized: false, // should be set to true in production
+  },
+});
 
 const SECRET_KEY = process.env.SECRET_KEY ?? "123456789";
+
+type Code = {
+  code: string;
+  _id: string;
+};
+
+const codes: Code[] = [];
 
 export const InicioSesionUsuario = async (
   req: Request,
@@ -173,8 +194,7 @@ export const GetTotalDashboard = async (
 
     const UltimasDosventas = await FacturaModel.find({
       usuariocontenedor: _id,
-    })
-    console.log(UltimasDosventas)
+    });
     res.status(200).send({
       VentasPorMes,
       facturas: facturas.length,
@@ -183,9 +203,93 @@ export const GetTotalDashboard = async (
       UltimasDosventas: UltimasDosventas.slice(-2),
     });
   } catch (error) {
-    console.log(error);
     res.status(500).send({
       msg: "Error al obtener información",
     });
+  }
+};
+
+export const CambiarDatosBasicos = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { _id } = req.user as { _id: "" };
+
+  const VerificarUsuario = await UsuarioModel.findOne({ _id });
+
+  if (!VerificarUsuario) return res.status(400).send({ msg: "User not found" });
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const codeObject: Code = {
+    code,
+    _id,
+  };
+  codes.push(codeObject);
+  try {
+    const info = await transporter.sendMail({
+      from: '"PIS" <pisstreamer@gmail.com>',
+      to: VerificarUsuario.correo,
+      subject: "Cambio de datos",
+      text: "Hola, este es un mensaje de prueba",
+      html: `<h1>Hola, este es el codigo de verificacion: ${code} tienes 1 minuto para usar el codigo antes de que se borre</h1>`,
+    });
+    res.status(200).send({ msg: "Email enviado", info });
+    setTimeout(() => {
+      const index = codes.indexOf(codeObject);
+      if (index !== -1) {
+        codes.splice(index, 1);
+      }
+    }, 100000);
+  } catch (error) {
+    const index = codes.indexOf(codeObject);
+    if (index !== -1) {
+      codes.splice(index, 1);
+    }
+    res.status(500).send({ msg: "Error al enviar email" });
+  }
+};
+
+export const VerificarCodigo = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { code } = req.body;
+  const { _id } = req.user as { _id: "" };
+
+  const VerificarUsuario = await UsuarioModel.findOne({ _id });
+
+  if (!VerificarUsuario) return res.status(400).send({ msg: "User not found" });
+
+  const codeObject = codes.find((c) => c.code === code);
+  if (!codeObject) return res.status(400).send({ msg: "Invalid code" });
+
+  if (codeObject) {
+    res.status(200).send({ msg: "Code verified" });
+  } else {
+    res.status(400).send({ msg: "Invalid code" });
+  }
+};
+
+export const CambiarDatosBasicosDelUsuario = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const { type, value } = req.body;
+  const { _id } = req.user as { _id: "" };
+  console.log(type, value, _id);
+  try {
+    if (type === "contraseña") {
+      const contraseña = await bcrypt.hash(value, 15);
+      await UsuarioModel.findByIdAndUpdate(_id, {
+        contraseña: contraseña,
+      });
+    } else {
+      await UsuarioModel.findByIdAndUpdate(_id, {
+        [type]: value,
+      });
+    }
+
+    res.status(200).send({ msg: "Datos actualizados" });
+  } catch (error) {
+    res.status(500).send({ msg: "Error al actualizar los datos" });
   }
 };

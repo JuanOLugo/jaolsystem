@@ -98,6 +98,7 @@ const SellerManagement: React.FC = () => {
 
       UpdateSellers(updatedSeller)
         .then((res) => {
+
           setSellers((prev) =>
             prev.map((seller) =>
               seller._id === selectedSeller._id
@@ -127,7 +128,9 @@ const SellerManagement: React.FC = () => {
         createdAt: new Date().toLocaleDateString("es-co"),
       };
       await CreateSeller(newSeller)
-        .then((res) => setSellers((prev) => [...prev, newSeller]))
+        .then((res) => {
+          setSellers((prev) => [...prev, {...newSeller, _id: res.data.nuevoVendedorGuardado._id}])
+        })
         .catch((err) => console.log(err));
     }
 
@@ -153,6 +156,7 @@ const SellerManagement: React.FC = () => {
 
   // Eliminar vendedor
   const handleDelete = (id: string) => {
+    console.log(id)
     DeleteSellers(id)
       .then((data) => {
         setSellers((prev) => prev.filter((seller) => seller._id !== id));

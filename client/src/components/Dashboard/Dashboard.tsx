@@ -23,15 +23,7 @@ interface DatosVentas {
 }
 
 export function Dashboard() {
-  //Obtener cantidad de productos vendidos
 
-  //obtener cantidad de facturas
-
-  //obtener cantidad de productos
-
-  //obtener array de ventas por mes
-
-  // obtener user info
   const date = new Date().toLocaleDateString("es-co");
   const [UserInfo, setUserInfo] = useState(null);
   const [DashboardData, setDashboardData] = useState<DatosVentas>();

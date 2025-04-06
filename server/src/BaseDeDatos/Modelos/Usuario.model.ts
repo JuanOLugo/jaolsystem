@@ -16,7 +16,7 @@ interface IUsuario {
 const SchemaUsuario = new Schema<IUsuario>({
   nombreusuario: { type: String, required: true },
   contraseña: { type: String, required: true, select: false },
-  correo: { type: String, required: true },
+  correo: { type: String, required: true, unique: true },
   creadoEn: { type: String, required: true },
   estado: { type: Boolean, required: true },
   rol: { type: String, required: true },

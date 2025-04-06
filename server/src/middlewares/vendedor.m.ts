@@ -37,6 +37,7 @@ export const CrearVendedor = async (
 
   const BuscarUsuario = await VendedoresModel.findOne({
     email: email,
+    usuarioContenedor: _id,
   });
 
   if (!BuscarUsuario) {
@@ -51,8 +52,8 @@ export const CrearVendedor = async (
       usuarioContenedor: _id,
     });
     try {
-      await nuevoVendedor.save();
-      res.status(200).json({ msg: "Vendedor creado" });
+      const nuevoVendedorGuardado = await nuevoVendedor.save();
+      res.status(200).json({ msg: "Vendedor creado", nuevoVendedorGuardado });
     } catch (error) {
       console.log(error);
       res.status(500).json({ msg: "Error al crear vendedor" });
@@ -101,12 +102,13 @@ export const EliminarVendedor = async (
   const { SellerId } = req.body;
   if (!_id) return res.status(400).json({ msg: "No auth" });
   if (!SellerId) return res.status(400).json({ msg: "Faltan datos" });
-
+  console.log(SellerId)
   try {
     await VendedoresModel.findByIdAndDelete(SellerId);
     res.status(200).send({ msg: "Vendedor eliminado" });
   } catch (error) {
-    res.status(500).send({ msg: "Error al eliminar el vendedor" });
+    
+    res.status(500).send({ msg: "Error al eliminar el vendedor", error});
   }
 };
 

@@ -16,8 +16,8 @@ export interface IUserinfo {
 }
 
 const axiosConfigHeader = {
-    Authorization: "bearer " + localStorage.getItem("user"),
-  }
+  Authorization: "bearer " + localStorage.getItem("user"),
+};
 
 export const LoginUser = async (data: IUserLogin): Promise<any> => {
   const response = await axios.post(proxyUrl + "/auth/login", data);
@@ -39,8 +39,44 @@ export const GetUserInfo = async (data: IUserinfo): Promise<any> => {
 };
 
 export const GetDashBoardInfo = async (date: string): Promise<any> => {
-  const response = await axios.post(proxyUrl + "/auth/dashboardinfo", {date}, {
+  const response = await axios.post(
+    proxyUrl + "/auth/dashboardinfo",
+    { date },
+    {
+      headers: axiosConfigHeader,
+    }
+  );
+  return response;
+};
+
+export const GetChangeThingCode = async (): Promise<any> => {
+  const response = await axios.get(proxyUrl + "/auth/changedata", {
     headers: axiosConfigHeader,
   });
   return response;
 };
+
+export const VerifyCode = async (code: string): Promise<any> => {
+  const response = await axios.post(
+    proxyUrl + "/auth/verifycode",
+    { code },
+    {
+      headers: axiosConfigHeader,
+    }
+  );
+  return response;
+};
+
+export const ChangeBasicUserInfo = async ({type, value}: {type: string, value: string}): Promise<any> => {
+  const response = await axios.post(
+    proxyUrl + "/auth/changeuserinfo",
+    { type, value },
+    {
+      headers: axiosConfigHeader,
+    }
+  );
+  return response;
+};
+
+
+
