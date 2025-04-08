@@ -2,6 +2,7 @@ import ProductoModel from "../BaseDeDatos/Modelos/Producto.model";
 import UsuarioModel from "../BaseDeDatos/Modelos/Usuario.model";
 import FacturaModel from "../BaseDeDatos/Modelos/Factura.model";
 import { Request, Response, NextFunction } from "express";
+import { Product } from "./factura.m";
 
 export const CreateProduct = async (
   req: Request,
@@ -143,10 +144,9 @@ export const UpdateProduct = async (
       actualizadoEn,
     });
 
-    res.status(200).send({ msg: "Producto actualizado" });
+    return res.status(200).send({ msg: "Producto actualizado" });
   } catch (error) {
-    res.status(500).send({ error: "Error al actualizar el producto" });
-    console.log(error);
+    return res.status(500).send({ error: "Error al actualizar el producto" });
   }
 };
 
@@ -155,9 +155,7 @@ export const FilterProductByCode = async (
   res: Response
 ): Promise<any> => {
   const UserId = (req.user as { _id: string })?._id;
-  const {
-    code
-  } = req.params;
+  const { code } = req.params;
   if (UserId === "" || !code) return res.status(400).send({ msg: "No auth" });
 
   const BuscarProductoPorCodigo = await ProductoModel.findOne({
@@ -165,7 +163,39 @@ export const FilterProductByCode = async (
     usuariocontenedor: UserId,
   });
 
-  if (!BuscarProductoPorCodigo) return res.status(404).send({ msg: "Producto no encontrado" });
+  if (!BuscarProductoPorCodigo)
+    return res.status(404).send({ msg: "Producto no encontrado" });
   res.status(200).send({ data: BuscarProductoPorCodigo });
-  
+};
+
+export const RegistrarMultiplesProductos = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  const UserId = (req.user as { _id: string })?._id;
+  const Productos : Product[] = req.body.products;
+  if (UserId === "" || !UserId) return res.status(400).send({ msg: "No auth" });
+
+  try {
+    const productos = await ProductoModel.find({usuariocontenedor: UserId, _id: {$in: Productos.map(p => p._id)}});
+
+    for (const productP of Productos) {
+      productos.map(async (product) => {
+        if(productP._id === product._id.toString()){
+          await ProductoModel.findByIdAndUpdate(product._id, {
+            stock: product.stock + productP.stock,
+            precioDeCosto: productP.precioDeCosto,
+            precioDeVenta: productP.precioDeVenta,
+            nombre: productP.nombre,
+            codigoBarra: productP.codigoBarra,
+            actualizadoEn: productP.actualizadoEn,
+          });
+        }
+      });
+    }
+
+    return res.status(200).send({ msg: "Productos registrados" });
+  } catch (error) {
+    return res.status(500).send({ error: "Error al actualizar el producto" });
+  }
 };

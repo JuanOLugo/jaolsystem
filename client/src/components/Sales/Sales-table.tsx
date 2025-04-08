@@ -37,10 +37,6 @@ export interface Sale {
   __v: number;
 }
 
-
-
-
-
 const SalesTable: React.FC = () => {
   const [sales, setSales] = useState<Array<Sale>>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,7 +45,9 @@ const SalesTable: React.FC = () => {
   const [profit, setProfit] = useState(0);
   const [Fecha, setFecha] = useState(new Date().toLocaleDateString("es-co"));
   const [IsOpen, setIsOpen] = useState(false);
-  const [invoiceProducts, setinvoiceProducts] = useState<Array<InvoiceItem>>([])
+  const [invoiceProducts, setinvoiceProducts] = useState<Array<InvoiceItem>>(
+    []
+  );
   // Función para manejar la búsqueda
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
@@ -67,6 +65,7 @@ const SalesTable: React.FC = () => {
 
   useEffect(() => {
     GetInvoice(Fecha).then((data) => {
+      console.log(data.data.facturas);
       console.log(data);
       setSales(data.data.facturas);
       setProfit(data.data.totalWin);
@@ -97,21 +96,27 @@ const SalesTable: React.FC = () => {
 
   const OnClose = () => setIsOpen(false);
   const OnSave = (products: InvoiceItem[]) => {
-    UpdateInvoice(products).then(data => console.log(data)).catch(err => console.log(err))
+    UpdateInvoice(products)
+      .then((data) => console.log(data))
+      .catch((err) => console.log(err));
     setIsOpen(false);
     window.location.reload();
-  }
+  };
 
   useEffect(() => {
-    if(invoiceProducts.length > 0){
-      setIsOpen(true)
+    if (invoiceProducts.length > 0) {
+      setIsOpen(true);
     }
-  }, [invoiceProducts])
-  
+  }, [invoiceProducts]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-      <InvoiceEditModal isOpen={IsOpen} onClose={OnClose} onSave={OnSave}  invoiceProducts={invoiceProducts}/>
+      <InvoiceEditModal
+        isOpen={IsOpen}
+        onClose={OnClose}
+        onSave={OnSave}
+        invoiceProducts={invoiceProducts}
+      />
       <div className="max-w-7xl mx-auto">
         <h1 className="text-2xl font-semibold text-gray-800 mb-6">
           Tabla de Ventas
@@ -150,38 +155,47 @@ const SalesTable: React.FC = () => {
 
         {/* Tabla */}
         <div className="overflow-x-auto bg-white rounded-xl shadow-sm h-96 overflow-y-scroll">
-          <table className="min-w-full divide-y divide-gray-200 ">
+          {
+            sales.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 border border-dashed border-gray-300 rounded-lg">
+                <h1>No hay ventas registradas.</h1>
+              </div>
+            ) : (
+              <table className="min-w-full divide-y divide-gray-200 ">
             <thead className="bg-gray-50">
               <tr>
-                {["Código", "Comprador", "Vendedor", "Total", "Fecha", "Acciones"].map(
-                  (header, index) => (
-                    <th
-                      key={index}
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={() =>
-                        handleSort(header.toLowerCase() as keyof Sale)
-                      }
-                    >
-                      <div className="flex items-center">
-                        {header}
-                        {sortColumn === header.toLowerCase() &&
-                          (sortDirection === "asc" ? (
-                            <ChevronUp size={16} />
-                          ) : (
-                            <ChevronDown size={16} />
-                          ))}
-                      </div>
-                    </th>
-                  )
-                )}
+                {[
+                  "Código",
+                  "Comprador",
+                  "Vendedor",
+                  "Total",
+                  "Fecha",
+                  "Acciones",
+                ].map((header, index) => (
+                  <th
+                    key={index}
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() =>
+                      handleSort(header.toLowerCase() as keyof Sale)
+                    }
+                  >
+                    <div className="flex items-center">
+                      {header}
+                      {sortColumn === header.toLowerCase() &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp size={16} />
+                        ) : (
+                          <ChevronDown size={16} />
+                        ))}
+                    </div>
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200 " >
-              {!sales ? (
-                <h1>cargando</h1>
-              ) : (
-                sales.map((sale) => (
+            
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sales.map((sale) => (
                   <tr key={sale._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {sale._id}
@@ -199,14 +213,18 @@ const SalesTable: React.FC = () => {
                       {sale.creadoEn}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-blue-600 hover:text-blue-900 mr-3" onClick={async () => {
-                        await GetProductInvoice(sale._id).then((data) => {
-                          setinvoiceProducts(data.data.ProductosEnFactura)
-                          console.log(data.data.ProductosEnFactura)
-                          
-                        }).catch((err) => console.log(err));
-                        
-                      }}>
+                      <button
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        onClick={async () => {
+                          try {
+                            const data = await GetProductInvoice(sale._id);
+                            setinvoiceProducts(data.data.ProductosEnFactura);
+                            console.log(data.data.ProductosEnFactura);
+                          } catch (err) {
+                            console.log(err);
+                          }
+                        }}
+                      >
                         <Eye size={18} />
                       </button>
                       <button
@@ -217,10 +235,11 @@ const SalesTable: React.FC = () => {
                       </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
+                ))}
+              </tbody>
           </table>
+            )
+          }
         </div>
 
         {/* Totales */}

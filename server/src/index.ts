@@ -14,11 +14,10 @@ app.use(express.json());
 app.use(
   cors({
     origin: "http://localhost:5173",
-    credentials: true
+    credentials: true,
   })
 );
 app.use(PassportStrategy.initialize());
-
 app.use("/api/auth", usuarioRutas);
 app.use("/api/product", productoRutas);
 app.use("/api/invoice", facturasRutas);
@@ -30,10 +29,10 @@ app.get("*", (req, res) =>
   res.sendFile(path.join(__dirname, "../public/frontend/index.html"))
 );
 
-
 //Configuracion del servidor & puerto
 const server_port = parseInt(process.env.PORT ?? "3000");
 app.listen(server_port, () => {
   console.log("Servidor esta activo en el puerto:", server_port);
   conexionDbPrincipal();
 });
+export default app;

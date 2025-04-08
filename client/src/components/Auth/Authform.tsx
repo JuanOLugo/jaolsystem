@@ -63,7 +63,10 @@ const AuthForms: React.FC = () => {
               window.location.reload();
             }
           })
-          .catch((err) => Errorhandle(err.response.data.msg, setError));
+          .catch((err) => {
+            Errorhandle(err.response.data.msg, setError)
+            setLoading(false)
+          });
         return;
       } else {
         Errorhandle("Error rellene credenciales", setError);
@@ -103,7 +106,10 @@ const AuthForms: React.FC = () => {
               window.location.reload();
             } else Errorhandle("Error to set user, try again", setError);
           })
-          .catch((err) => Errorhandle(err.response.data.msg, setError));
+          .catch((err) => {
+            Errorhandle(err.response.data.msg, setError)
+            setLoading(false)
+          });
       } else Errorhandle("Rellene las credenciales", setError);
     }
   };

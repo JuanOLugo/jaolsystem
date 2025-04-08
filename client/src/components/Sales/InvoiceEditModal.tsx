@@ -54,7 +54,13 @@ const InvoiceEditModal: React.FC<InvoiceEditModalProps> = ({
       setSearchTerm("");
       setShowProductSelector(false);
     }
+    
   }, [isOpen, initialInvoiceProducts]);
+
+  useEffect(() => {
+    console.log(initialInvoiceProducts)
+  }, [initialInvoiceProducts])
+  
 
   // Calcular el total de la factura
   useEffect(() => {

@@ -16,16 +16,12 @@ import { GetSellers } from "../../Controllers/Seller.controllers";
 import { Seller, Vendedor } from "../Users/SellerManagment";
 import FilterProduct from "./FilterProduct";
 
-export type Product = {
-  id: string;
-  code: string;
-  name: string;
-  price: number;
+import { Product } from "../Products/Product-table";
+
+export interface ProductExtend extends Product {
   discount: number;
   realName: string;
   quantity: number;
-  maxQuantity: number;
-  priceCost: number;
 };
 
 interface RecentProducts {
@@ -43,19 +39,22 @@ interface RecentProducts {
 }
 
 const Invoicing: React.FC = () => {
-  const [formData, setFormData] = useState<Product>({
-    id: "",
-    code: "",
-    name: "",
-    price: 0,
-    priceCost: 0,
+  const [formData, setFormData] = useState<ProductExtend>({
+    _id: "",
+    codigoBarra: "",
+    nombre: "",
+    precioDeVenta: 0,
+    precioDeCosto: 0,
     discount: 0,
     quantity: 1,
-    maxQuantity: 0,
+    stock: 0,
     realName: "",
+    proveedorNombre: "",
+    creadoEn: "",
+    actualizadoEn: "",
   });
   const [IndividualSeller, setIndividualSeller] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<ProductExtend[]>([]);
   const [RecentProducts, setRecentProducts] = useState<Array<RecentProducts>>(
     []
   );
@@ -106,7 +105,7 @@ const Invoicing: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       [name]:
-        name === "price" || name === "discount" || name === "quantity"
+        name === "precioDeVenta" || name === "discount" || name === "quantity"
           ? Number.parseInt(value)
           : value,
     }));
@@ -120,14 +119,14 @@ const Invoicing: React.FC = () => {
       if (isOnArray) {
         setFormData((prev) => ({
           ...prev,
-          code: isOnArray.codigoBarra,
+          codigoBarra: isOnArray.codigoBarra,
           quantity: 1,
-          id: isOnArray._id,
-          name: isOnArray.nombre,
+          _id: isOnArray._id,
+          nombre: isOnArray.nombre,
           realName: isOnArray.nombre,
-          price: isOnArray.precioDeVenta,
-          maxQuantity: isOnArray.stock,
-          priceCost: isOnArray.precioDeCosto,
+          precioDeVenta: isOnArray.precioDeVenta,
+          stock: isOnArray.stock,
+          precioDeCosto: isOnArray.precioDeCosto,
         }));
       } else {
         const response = await ProductByCode(value);
@@ -142,14 +141,14 @@ const Invoicing: React.FC = () => {
         setRecentProducts([...RecentProducts, response.data.data]);
         setFormData((prev) => ({
           ...prev,
-          code: codigoBarra,
+          codigoBarra,
           quantity: 1,
-          id: _id,
-          name: nombre,
+           _id,
+          nombre,
           realName: nombre,
-          price: parseInt(precioDeVenta),
-          maxQuantity: stock,
-          priceCost: precioDeCosto,
+          precioDeVenta: parseInt(precioDeVenta),
+          stock,
+          precioDeCosto: precioDeCosto,
         }));
       }
     } catch (error) {
@@ -158,17 +157,17 @@ const Invoicing: React.FC = () => {
   };
 
   useEffect(() => {
-      if(formData.code.length > 0) {
-        handleChangeCode(formData.code);
+      if(formData.codigoBarra.length > 0) {
+        handleChangeCode(formData.codigoBarra);
       }
 
-  }, [formData.code])
+  }, [formData.codigoBarra])
   
 
   useEffect(() => {
     if (products) {
       const TotalSell = products.reduce((total, product) => {
-        const discountedPrice = product.price * (1 - product.discount / 100);
+        const discountedPrice = product.precioDeVenta * (1 - product.discount / 100);
         return total + discountedPrice * product.quantity;
       }, 0);
       setTotal(TotalSell);
@@ -181,15 +180,15 @@ const Invoicing: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
-      formData.code &&
-      formData.name &&
-      formData.price > 0 &&
+      formData.codigoBarra &&
+      formData.nombre &&
+      formData.precioDeVenta > 0 &&
       formData.quantity > 0
     ) {
-      const IsOnList = products.find((p) => p.code === formData.code);
+      const IsOnList = products.find((p) => p.codigoBarra === formData.codigoBarra);
       if (IsOnList) {
-        const ChangeQuantity = products.filter((product: Product) => {
-          if (product.code === formData.code) {
+        const ChangeQuantity = products.filter((product: ProductExtend) => {
+          if (product.codigoBarra === formData.codigoBarra) {
             product.quantity = product.quantity + formData.quantity;
             product.discount = formData.discount;
           }
@@ -199,7 +198,7 @@ const Invoicing: React.FC = () => {
       } else setProducts((prev) => [...prev, { ...formData }]);
 
       const ChangeProductStock = RecentProducts.filter((p) => {
-        if (p._id === formData.id) {
+        if (p._id === formData._id) {
           p.stock = p.stock - formData.quantity;
         }
         return p;
@@ -207,22 +206,25 @@ const Invoicing: React.FC = () => {
 
       setRecentProducts(ChangeProductStock);
       setFormData({
-        id: "",
-        code: "",
-        name: "",
-        price: 0,
+        _id: "",
+        codigoBarra: "",
+        nombre: "",
+        precioDeVenta: 0,
         discount: 0,
         quantity: 1,
-        maxQuantity: 0,
+        stock: 0,
         realName: "",
-        priceCost: 0,
+        precioDeCosto: 0,
+        proveedorNombre: "",
+        creadoEn: "",
+        actualizadoEn: "",
       });
     }
   };
 
   const removeProduct = (code: string) => {
     const updatedProducts =
-      products.find((product) => product.code == code)?.quantity || 0;
+      products.find((product) => product.codigoBarra == code)?.quantity || 0;
     console.log(updatedProducts);
     const UpdatePrev = RecentProducts.filter((p) => {
       if (p.codigoBarra === code) {
@@ -232,7 +234,7 @@ const Invoicing: React.FC = () => {
     });
     setRecentProducts(UpdatePrev);
 
-    setProducts((prev) => prev.filter((product) => product.code !== code));
+    setProducts((prev) => prev.filter((product) => product.codigoBarra !== code));
   };
 
   const handleOpenModal = () => {
@@ -293,9 +295,9 @@ const Invoicing: React.FC = () => {
                     type="text"
                     id="code"
                     ref={InputRefCode}
-                    name="code"
-                    value={formData.code}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value }))}
+                    name="codigoBarra"
+                    value={formData.codigoBarra}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, codigoBarra: e.target.value }))}
                     className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Código del producto"
                     required
@@ -318,8 +320,8 @@ const Invoicing: React.FC = () => {
                   <input
                     type="text"
                     id="name"
-                    name="name"
-                    value={formData.name}
+                    name="nombre"
+                    value={formData.nombre}
                     onChange={handleChange}
                     ref={InputRefProductName}
                     className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -327,7 +329,7 @@ const Invoicing: React.FC = () => {
                     required
                   />
                 </div>
-                <FilterProduct searchTerm={formData.name} Ref={InputRefProductName} setCode={setFormData}/>
+                <FilterProduct searchTerm={formData.nombre} Ref={InputRefProductName} setCode={setFormData}/>
               </div>
 
               <div>
@@ -345,8 +347,8 @@ const Invoicing: React.FC = () => {
                   <input
                     type="number"
                     id="price"
-                    name="price"
-                    value={formData.price}
+                    name="precioDeVenta"
+                    value={formData.precioDeVenta}
                     onChange={handleChange}
                     className="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Precio de venta"
@@ -406,7 +408,7 @@ const Invoicing: React.FC = () => {
                     placeholder="Cantidad"
                     min="1"
                     required
-                    max={formData.maxQuantity}
+                    max={formData.stock}
                   />
                 </div>
               </div>
@@ -435,21 +437,21 @@ const Invoicing: React.FC = () => {
                 <ul className="space-y-3">
                   {products.map((product) => (
                     <li
-                      key={product.id}
+                      key={product._id}
                       className="bg-gray-50 rounded-lg p-3 flex justify-between items-center"
                     >
                       <div>
                         <h3 className="font-medium">{product.realName}</h3>
                         <p className="text-sm text-gray-500">
-                          Código: {product.code} | Cantidad: {product.quantity}
+                          Código: {product.codigoBarra} | Cantidad: {product.quantity}
                         </p>
                         <p className="text-sm text-gray-500">
-                          Precio: ${product.price.toLocaleString("es-co")} |
+                          Precio: ${product.precioDeVenta.toLocaleString("es-co")} |
                           Descuento: {product.discount}%
                         </p>
                       </div>
                       <button
-                        onClick={() => removeProduct(product.code)}
+                        onClick={() => removeProduct(product.codigoBarra)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <X size={18} />

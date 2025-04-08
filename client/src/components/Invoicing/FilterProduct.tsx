@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { GetMyProducts } from "../../Controllers/Product.controllers";
 import { Product as PTable } from "../Products/Product-table";
-import { Product } from "./Invoicing";
-import { Code } from "lucide-react";
+import { ProductExtend } from "./Invoicing";
+
 
 type FilterProductProps = {
   searchTerm: string;
   Ref: React.RefObject<HTMLInputElement>;
-  setCode: React.Dispatch<React.SetStateAction<Product>>;
+  setCode: React.Dispatch<React.SetStateAction<ProductExtend>>;
 };
 
 function FilterProduct({ searchTerm, Ref, setCode}: FilterProductProps) {
@@ -46,7 +46,7 @@ function FilterProduct({ searchTerm, Ref, setCode}: FilterProductProps) {
             <div
               key={i}
               onClick={() => {
-                setCode((prev) => ({...prev, code: product.codigoBarra}));
+                setCode((prev) => ({...prev, code: product.codigoBarra, codigoBarra: product.codigoBarra}));
                 console.log(product);
               }}
               className="flex flex-row gap-2 border hover:bg-blue-600 p-2 rounded-md cursor-pointer"

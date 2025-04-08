@@ -143,7 +143,7 @@ export const GetTotalDashboard = async (
     const Productos = await ProductoModel.find({ usuariocontenedor: _id });
 
     // Convertir "day/month/year" a "YYYY-MM-DD"
-    const [day, month, year] = date.split("/");
+    const [day, month, year] = date.split("/"); 
     const formattedDate = new Date(`${year}-${month}-${day}`);
 
     const mes = formattedDate.getMonth() + 1; // Obtener mes correcto (1-12)
@@ -221,15 +221,14 @@ export const CambiarDatosBasicos = async (
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   const codeObject: Code = {
     code,
-    _id,
+    _id: VerificarUsuario._id.toString(),
   };
   codes.push(codeObject);
   try {
     const info = await transporter.sendMail({
-      from: '"PIS" <pisstreamer@gmail.com>',
+      from: '"CORREO CAMBIO DE DATOS" <JaolSystem@SystemJaol.com>',
       to: VerificarUsuario.correo,
       subject: "Cambio de datos",
-      text: "Hola, este es un mensaje de prueba",
       html: `<h1>Hola, este es el codigo de verificacion: ${code} tienes 1 minuto para usar el codigo antes de que se borre</h1>`,
     });
     res.status(200).send({ msg: "Email enviado", info });
@@ -259,7 +258,10 @@ export const VerificarCodigo = async (
 
   if (!VerificarUsuario) return res.status(400).send({ msg: "User not found" });
 
-  const codeObject = codes.find((c) => c.code === code);
+  const codeObject = codes.find((c) => {
+    return c.code === code ;
+  });
+  console.log(codeObject);
   if (!codeObject) return res.status(400).send({ msg: "Invalid code" });
 
   if (codeObject) {

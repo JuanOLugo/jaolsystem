@@ -53,7 +53,6 @@ vendedorRutas.post(
   EditarReporte
 );
 
-
 vendedorRutas.post(
   "/deletereport",
   PassportStrategy.authenticate("jwt", { session: false }),

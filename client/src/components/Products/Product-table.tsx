@@ -8,16 +8,19 @@ import {
   ChevronUp,
   ChevronRight,
   ChevronLeft,
+  Plus,
 } from "lucide-react";
 import {
   DeleteProduct,
   GetMyProducts,
+  RegisterNewProducts,
   UpdateProduct,
 } from "../../Controllers/Product.controllers";
 import ErrorToast from "../toast/ErrorToast";
 import { Errorhandle, Succeshandle } from "../toast/ToastFunctions/ErrorHandle";
 import EditProductModal from "./EditProductModal";
 import SuccessToast from "../toast/SuccesToast";
+import ProductRegistrationModal from "./ProductRegistrationModal";
 
 // Tipo para un producto
 export type Product = {
@@ -32,6 +35,7 @@ export type Product = {
   actualizadoEn: string;
 };
 
+export type IsOpenType = "none" | "editsingle" | "editmultiple";
 // Datos de ejemplo
 
 const ProductTable: React.FC = () => {
@@ -43,8 +47,8 @@ const ProductTable: React.FC = () => {
   const [ProductQuantity, setProductQuantity] = useState(0);
   const [Calls, setCalls] = useState(0);
   const [OnClose, setOnClose] = useState(true);
-  const [IsOpen, setIsOpen] = useState(false);
-  const [Success, setSuccess] = useState("")
+  const [IsOpen, setIsOpen] = useState<IsOpenType>("none");
+  const [Success, setSuccess] = useState("");
 
   const [ProductToEdit, setProductToEdit] = useState<Product | null>(null);
   // Función para manejar la búsqueda
@@ -69,13 +73,11 @@ const ProductTable: React.FC = () => {
       .then((response) => {
         setProducts(response.data.data);
         setProductQuantity(response.data.length);
-        console.log("1");
       })
       .catch(() => Errorhandle("Algo fallo en el servidor", setError));
   }, [Calls, searchTerm]);
 
   const onSave = async (product: Product) => {
-    console.log(product);
     await UpdateProduct(product)
       .then((res) => Succeshandle(res.data.msg, setSuccess))
       .catch((err) => Errorhandle("Algo fallo en el servidor", setError));
@@ -83,30 +85,66 @@ const ProductTable: React.FC = () => {
       p._id === product._id ? product : p
     );
     setProducts(newProductsTable);
-    onClose(product);
+    onCloseSingle(product);
   };
 
-  const onClose = async (product: Product) => {
+  const onCloseSingle = async (product: Product) => {
     setProductToEdit(product);
-    setIsOpen(false);
+    setIsOpen("none");
     setOnClose(true);
     return;
   };
 
+  const onCloseMultiple = async () => {
+    setIsOpen("none");
+    setOnClose(true);
+    return;
+  };
+
+  const OnsaveMultiple = async (products: Product[]) => {
+    RegisterNewProducts(products)
+      .then((res) => {
+        Succeshandle(res.data.msg, setSuccess)
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      })
+      .catch((err) => console.log(err));
+    setIsOpen("none");
+  };
+
   return (
-    <div className="min-h-screen h-screen bg-gradient-to-b from-blue-50 to-white p-6 ">
+    <div className="min-h-screen h-screen bg-gradient-to-b z-10 from-blue-50 to-white p-6 ">
       <ErrorToast error={Error} />
-      <SuccessToast success={Success}/>
+      <SuccessToast success={Success} />
+      <ProductRegistrationModal
+        isOpen={IsOpen === "editmultiple" ? true : false}
+        onClose={onCloseMultiple}
+        onSave={OnsaveMultiple}
+      />
       <EditProductModal
         onSave={onSave}
-        isOpen={IsOpen}
-        onClose={onClose}
+        isOpen={IsOpen === "editsingle" ? true : false}
+        onClose={onCloseSingle}
         product={!ProductToEdit ? null : ProductToEdit}
       />
+
       <div className="max-w-7xl mx-auto   h-[90%] ">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6">
-          Tabla de Productos
-        </h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-800 ">
+            Tabla de Productos
+          </h1>
+
+          <div className="mt-4 md:mt-0">
+            <button
+              onClick={() => setIsOpen("editmultiple")}
+              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center transition-colors"
+            >
+              <Plus size={18} className="mr-2" />
+              Registrar Productos
+            </button>
+          </div>
+        </div>
 
         {/* Buscador */}
         <div className="mb-4 relative">
@@ -189,7 +227,7 @@ const ProductTable: React.FC = () => {
                       className="text-blue-600 hover:text-blue-900 mr-3"
                       onClick={() => {
                         setProductToEdit(product);
-                        setIsOpen(true);
+                        setIsOpen("editsingle");
                       }}
                     >
                       <Edit size={18} />

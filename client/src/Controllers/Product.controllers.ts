@@ -1,5 +1,7 @@
 import axios from "axios";
 import { ProductSend } from "../components/Products/Createproducts";
+import { Product } from "../components/Products/Product-table";
+
 const proxyUrl = "http://localhost:3000/api";
 axios.defaults.withCredentials = true;
 
@@ -40,6 +42,12 @@ export const ProductByCode = async (data: string): Promise<any> => {
   const response = await axios.get(proxyUrl + "/product/getPbyCode/" + data, {headers: axiosConfigHeader});
   return response;
 };
+
+export const RegisterNewProducts = async (products: Product[] ): Promise<any> => {
+  const response = await axios.post(proxyUrl + "/product/registernewproducts",  {products}, {headers: axiosConfigHeader});
+  return response;
+};
+
 
 
 

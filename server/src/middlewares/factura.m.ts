@@ -15,15 +15,15 @@ interface IPaymentData {
 }
 
 interface IProduct {
-  id: string;
-  code: string;
-  name: string;
+  _id: string;
+  codigoBarra: string;
+  nombre: string;
   realName: string;
-  price: number;
+  precioDeVenta: number;
   quantity: number;
   discount: number;
-  maxQuantity: number;
-  priceCost: number;
+  stock: number;
+  precioDeCosto: number;
 }
 
 export type Product = {
@@ -82,7 +82,7 @@ export const GuardarFatura = async (
 
   //Guardar productos en la base de datos
   products.forEach(async (product) => {
-    const producto = await ProductoModel.findOne({ codigoBarra: product.code });
+    const producto = await ProductoModel.findOne({ codigoBarra: product.codigoBarra });
     if (producto) {
       producto.stock -= product.quantity;
       await producto.save();
@@ -94,12 +94,12 @@ export const GuardarFatura = async (
   products.map(async (product) => {
     const nuevoProducto = new ProductoEnFacturaModel({
       cantidad: product.quantity,
-      precioCosto: product.priceCost,
-      precioVenta: product.price,
+      precioCosto: product.precioDeCosto,
+      precioVenta: product.precioDeVenta,
       descuento: product.discount,
       facturacontenedora: saveFactura._id,
       creadoEn: new Date().toLocaleDateString("es-co"),
-      productoId: new mongoose.Types.ObjectId(product.id),
+      productoId: new mongoose.Types.ObjectId(product._id),
     });
 
     await nuevoProducto.save();
