@@ -1,15 +1,16 @@
+
 # JAOL System
 
-JAOL System es una aplicación de gestión de inventario y facturación diseñada para pequeños y medianos negocios. Este sistema permite administrar productos, generar facturas y controlar ventas de manera eficiente.
+JAOL System es una potente aplicación de gestión de inventario y facturación pensada para pequeños y medianos negocios. Permite administrar productos, controlar ventas y emitir facturas, todo desde una interfaz moderna y responsiva.
 
 ## 📦 Características Principales
 
-- **Gestión de Inventario**: Agrega, edita y elimina productos (CRUD completo)
-- **Facturación**: Crea y administra facturas con múltiples métodos de pago
-- **Reportes y Análisis**: Visualización de ventas mediante gráficos interactivos
-- **Autenticación Segura**: Manejo de usuarios con JWT y encriptación de contraseñas
-- **Interfaz Moderna**: Desarrollada con React y TailwindCSS para una experiencia rápida y fluida
-- **Navegación Amigable**: Interfaz responsiva para todo tipo de dispositivos
+- **Gestión de Inventario**: CRUD completo de productos
+- **Facturación Inteligente**: Soporte para múltiples métodos de pago
+- **Visualización de Datos**: Gráficas de ventas con Chart.js
+- **Autenticación Segura**: Usuarios con JWT y contraseñas cifradas
+- **UI Moderna**: Interfaz rápida con React y TailwindCSS
+- **Pruebas Automatizadas**: Cobertura con Jest para asegurar la estabilidad del backend
 
 ## 🚀 Tecnologías Utilizadas
 
@@ -47,19 +48,24 @@ JAOL.app/
 ├── server/                 # Backend
 │   ├── src/                # Código fuente de Express
 │   ├── public/             # Archivos públicos
+│   ├── tests/              # Pruebas unitarias e integración
+│   └── jest.config.js      # Configuración de Jest
 │   ├── package.json        # Dependencias del backend
 │   └── docker-compose.yml  # Configuración de Docker
 ```
 
-## 🛠️ Instalación y Configuración
+## 🛠️ Instalación
 
 ### **Requisitos Previos**
 - [Node.js](https://nodejs.org/) (versión 16 o superior)
 - [MongoDB](https://www.mongodb.com/) en ejecución
 - [Git](https://git-scm.com/)
+- [Docker](https://www.docker.com/) instalado (opcional, para despliegue)### **Requisitos Previos**
+- [Node.js](https://nodejs.org/) (versión 16 o superior)
+- [MongoDB](https://www.mongodb.com/) en ejecución
+- [Git](https://git-scm.com/)
 - [Docker](https://www.docker.com/) instalado (opcional, para despliegue)
 
-### **Pasos de Instalación**
 
 1. Clonar el repositorio:
    ```sh
@@ -104,13 +110,52 @@ JAOL.app/
 docker-compose up --build
 ```
 
-## 📜 Scripts disponibles
+### Variables de entorno (`server/.env`)
+```env
+MONGO_URI=tu_conexion_mongodb
+JWT_SECRET=clave_secreta
+```
+
+### Ejecutar el Proyecto
+
+```bash
+# Backend
+cd server
+npm start
+
+# Frontend
+cd ../client
+npm run dev
+```
+
+Abrir en: [http://localhost:5173](http://localhost:5173)
+
+## 🧪 Pruebas con Jest
+
+Se ha implementado un conjunto básico de pruebas en el backend usando Jest.
+
+### Ejecutar pruebas
+
+```bash
+cd server
+npm test
+```
+
+### Scripts disponibles
 
 | Comando           | Descripción                                |
 |-------------------|--------------------------------------------|
-| `npm run dev`     | Levanta el servidor de desarrollo          |
-| `npm run build`   | Compila la app para producción             |
-| `npm run preview` | Previsualiza la app compilada              |
+| `npm run dev`     | Levanta entorno de desarrollo (cliente)    |
+| `npm start`       | Inicia el backend                          |
+| `npm test`        | Ejecuta las pruebas con Jest               |
+| `npm run build`   | Compila frontend para producción           |
+| `npm run preview` | Previsualiza frontend en producción        |
+
+## 🐳 Docker (opcional)
+
+```bash
+docker-compose up --build
+```
 
 ## 🌐 Despliegue
 
@@ -120,34 +165,26 @@ Puedes desplegar esta aplicación en servicios como:
 - Netlify
 - Firebase Hosting
 
+
 ## 🔐 Seguridad
 
-- Encriptación de contraseñas con bcrypt
-- Uso de tokens JWT para autenticación segura
-- Validación de formularios
+- JWT + Passport para autenticación robusta
+- Contraseñas cifradas con bcrypt
+- Validación en formularios
 
-## 🧪 Pruebas
+## 👥 Contribuciones
 
-Las pruebas unitarias y de integración pueden ser implementadas usando herramientas como:
-
-- Jest
-- React Testing Library
-
-(Actualmente no se incluye cobertura de pruebas en esta versión.)
-
-## 📢 Contribuciones
-
-Si deseas contribuir, por favor abre un **issue** o envía un **pull request** con mejoras y sugerencias.
+¡Tus ideas y mejoras son bienvenidas! Puedes enviar un **pull request** o abrir un **issue**.
 
 ## 🧑‍💻 Autor
 
-- **Juan Ojeda**
-- [juanandresojeda77@gmail.com](mailto:juanandresojeda77@gmail.com)
+- **Juan Ojeda**  
+- 📧 [juanandresojeda77@gmail.com](mailto:juanandresojeda77@gmail.com)
 
-## 📂 Repositorio
+## 📁 Repositorio
 
 [https://github.com/JuanOLugo/jaolsystem](https://github.com/JuanOLugo/jaolsystem)
 
 ## ⚖️ Licencia
 
-Este proyecto está bajo la licencia **MIT**. ¡Úsalo libremente! 🚀
+Licencia MIT — ¡Utiliza y mejora libremente! 🚀
