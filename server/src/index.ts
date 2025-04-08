@@ -30,9 +30,9 @@ app.get("*", (req, res) =>
 );
 
 //Configuracion del servidor & puerto
-const server_port = parseInt(process.env.PORT ?? "3000");
-app.listen(server_port, () => {
-  console.log("Servidor esta activo en el puerto:", server_port);
-  conexionDbPrincipal();
-});
+// const server_port = parseInt(process.env.PORT ?? "3000");
+// app.listen(server_port, () => {
+//   console.log("Servidor esta activo en el puerto:", server_port);
+//   conexionDbPrincipal();
+// });
 export default app;

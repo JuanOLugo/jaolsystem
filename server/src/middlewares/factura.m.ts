@@ -6,7 +6,7 @@ import ProductoEnFacturaModel from "../BaseDeDatos/Modelos/ProductoEnFactura.mod
 import mongoose from "mongoose";
 
 // Interfaces para los cuerpos solicitados
-interface IPaymentData {
+export interface IPaymentData {
   amountPaid: number;
   change: number;
   paymentMethod: string;
@@ -14,7 +14,7 @@ interface IPaymentData {
   seller: string;
 }
 
-interface IProduct {
+export interface IProduct {
   _id: string;
   codigoBarra: string;
   nombre: string;

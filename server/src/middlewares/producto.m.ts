@@ -11,6 +11,9 @@ export const CreateProduct = async (
   const { _id } = req.user as { _id: "" };
   const { codigo, nombre, precioCosto, precioVenta, proveedor, date } =
     req.body;
+  if (!_id) return res.status(400).send({ error: "No auth" });
+  if (!codigo || !nombre || !precioCosto || !precioVenta || !proveedor || !date)
+    return res.status(400).send({ error: "Faltan datos" });
 
   try {
     const newProduct = new ProductoModel({
@@ -28,7 +31,7 @@ export const CreateProduct = async (
     await newProduct.save();
     res.status(201).send({ message: "Producto creado" });
   } catch (error) {
-    res.status(500).send({ error: "Error al crear el producto" });
+    res.status(400).send({ error: "Error al crear el producto" });
     console.log(error);
   }
 };
@@ -173,15 +176,18 @@ export const RegistrarMultiplesProductos = async (
   res: Response
 ): Promise<any> => {
   const UserId = (req.user as { _id: string })?._id;
-  const Productos : Product[] = req.body.products;
+  const Productos: Product[] = req.body.products;
   if (UserId === "" || !UserId) return res.status(400).send({ msg: "No auth" });
 
   try {
-    const productos = await ProductoModel.find({usuariocontenedor: UserId, _id: {$in: Productos.map(p => p._id)}});
+    const productos = await ProductoModel.find({
+      usuariocontenedor: UserId,
+      _id: { $in: Productos.map((p) => p._id) },
+    });
 
     for (const productP of Productos) {
       productos.map(async (product) => {
-        if(productP._id === product._id.toString()){
+        if (productP._id === product._id.toString()) {
           await ProductoModel.findByIdAndUpdate(product._id, {
             stock: product.stock + productP.stock,
             precioDeCosto: productP.precioDeCosto,
